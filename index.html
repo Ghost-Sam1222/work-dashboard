@@ -449,10 +449,19 @@ function saveMeta(meta) {
 // ── Compute ──
 function getLedgerRange(ledgerId) {
   try {
-    const raw = localStorage.getItem('ledger-' + ledgerId + '-settings');
+    const raw = _safeLS('ledger-' + ledgerId + '-settings');
     if (raw) {
       const s = JSON.parse(raw);
+      // New format: panelRanges.kpi.start/end (preferred)
+      if (s.panelRanges && s.panelRanges.kpi) {
+        return { start: s.panelRanges.kpi.start, end: s.panelRanges.kpi.end };
+      }
+      // Old format: dateStart/dateEnd
       if (s.dateStart && s.dateEnd) return { start: s.dateStart, end: s.dateEnd };
+      // Periods-based: use active period
+      if (s.periods && s.activePeriod != null && s.periods[s.activePeriod]) {
+        return { start: s.periods[s.activePeriod].start, end: s.periods[s.activePeriod].end };
+      }
     }
   } catch {}
   const now = new Date();
@@ -464,7 +473,7 @@ function getLedgerRange(ledgerId) {
 
 function getLedgerTotal(ledgerId) {
   try {
-    const data = JSON.parse(localStorage.getItem('ledger-' + ledgerId)) || [];
+    const data = JSON.parse(_safeLS('ledger-' + ledgerId)) || [];
     const range = getLedgerRange(ledgerId);
     return data.filter(r => r.date >= range.start && r.date <= range.end).reduce((s, r) => s + (r.earnings || 0), 0);
   } catch { return 0; }
@@ -472,7 +481,7 @@ function getLedgerTotal(ledgerId) {
 
 function getLedgerStats(ledgerId) {
   try {
-    const data = JSON.parse(localStorage.getItem('ledger-' + ledgerId)) || [];
+    const data = JSON.parse(_safeLS('ledger-' + ledgerId)) || [];
     const range = getLedgerRange(ledgerId);
     const rangeData = data.filter(r => r.date >= range.start && r.date <= range.end);
     const workDays = new Set(rangeData.map(r => r.date)).size;
@@ -492,7 +501,7 @@ function renderAll() {
     grandTotal += stats.total;
     // Count ALL records across all time (not filtered by date range)
     try {
-      const data = JSON.parse(localStorage.getItem('ledger-' + l.id)) || [];
+      const data = JSON.parse(_safeLS('ledger-' + l.id)) || [];
       data.forEach(r => allWorkDays.add(r.date));
       allRecords += data.length;
     } catch {}

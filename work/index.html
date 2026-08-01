@@ -637,7 +637,7 @@ function renderLineChart(data, settings) {
       type: 'line',
       data: { labels: [range.start, range.end], datasets: [{ data: [0, 0], borderColor: '#2c2c2a', borderWidth: 2, pointRadius: 0 }] },
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } },
-    });
+    }));
     return;
   }
 
@@ -685,7 +685,7 @@ function renderLineChart(data, settings) {
         y: { grid: { color: '#2c2c2a' }, ticks: { color: '#898781', font: { size: 11 }, callback: v => '¥' + v.toLocaleString() }, border: { color: '#383835' }, beginAtZero: true },
       },
     },
-  });
+  }));
 }
 
 // ── History ──
