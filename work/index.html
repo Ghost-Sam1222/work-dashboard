@@ -273,7 +273,7 @@
       <div style="display:flex;gap:8px;align-items:center">
         <span id="clockInWrap"><input type="time" id="modalClockIn" onchange="onClockChange()" style="flex:1"></span>
         <span style="color:var(--text-muted)" id="clockArrow">→</span>
-        <input type="time" id="modalClockOut" onchange="onClockChange()" style="flex:1">
+        <input type="time" id="modalClockOut" onchange="onClockChange()" min="19:00" max="23:00" style="flex:1">
       </div>
     </div>
     <div class="field" id="hoursField" style="display:none"><label>晚班时长（小时）<span style="font-weight:400;font-size:10px;color:var(--text-muted)"> 不足1h按1h算</span></label><input type="number" id="modalHours" placeholder="如 4、3.5" min="0.5" max="24" step="0.5" onchange="updatePreview()"></div>
@@ -821,7 +821,13 @@ function onClockChange() {
   const inp = document.getElementById('modalClockIn').value;
   const outp = document.getElementById('modalClockOut').value;
   if (inp && outp && currentType === 'night') {
-    const [ih, im] = inp.split(':').map(Number), [oh, om] = outp.split(':').map(Number);
+    const oh = parseInt(outp.split(':')[0]);
+    if (oh < 19 || oh > 23) {
+      alert('晚班时间区间为 19:00–23:00，请重新输入');
+      document.getElementById('modalClockOut').value = '';
+      return;
+    }
+    const [ih, im] = inp.split(':').map(Number), [_, om] = outp.split(':').map(Number);
     let diff = (oh * 60 + om - ih * 60 - im) / 60;
     document.getElementById('modalHours').value = diff.toFixed(1);
   }
