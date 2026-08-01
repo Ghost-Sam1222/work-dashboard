@@ -823,7 +823,6 @@ function onClockChange() {
   if (inp && outp && currentType === 'night') {
     const [ih, im] = inp.split(':').map(Number), [oh, om] = outp.split(':').map(Number);
     let diff = (oh * 60 + om - ih * 60 - im) / 60;
-    if (diff <= 0) diff += 24; // cross-midnight
     document.getElementById('modalHours').value = diff.toFixed(1);
   }
   updatePreview();
