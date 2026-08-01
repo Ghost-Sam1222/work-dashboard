@@ -269,10 +269,10 @@
     <div class="field"><label>班次类型</label>
       <div class="type-toggle"><button id="btnDay" class="active-day" onclick="setType('day')">☀️ 白班</button><button id="btnNight" onclick="setType('night')">🌙 晚班</button></div>
     </div>
-    <div class="field" id="clockFields" style="display:none"><label>打卡时间（可选）</label>
+    <div class="field" id="clockFields"><label>打卡时间（可选）</label>
       <div style="display:flex;gap:8px;align-items:center">
-        <input type="time" id="modalClockIn" onchange="onClockChange()" style="flex:1">
-        <span style="color:var(--text-muted)">→</span>
+        <span id="clockInWrap"><input type="time" id="modalClockIn" onchange="onClockChange()" style="flex:1"></span>
+        <span style="color:var(--text-muted)" id="clockArrow">→</span>
         <input type="time" id="modalClockOut" onchange="onClockChange()" style="flex:1">
       </div>
     </div>
@@ -801,12 +801,18 @@ function setType(t) {
     document.getElementById('btnNight').className = '';
     hf.style.display = 'none'; pf.style.display = 'none';
     document.getElementById('modalHours').value = '';
-    cf.style.display = 'none';
+    cf.style.display = 'block';
+    document.getElementById('clockInWrap').style.display = '';
+    document.getElementById('clockArrow').style.display = '';
+    document.getElementById('modalClockIn').value = '';
   } else {
     document.getElementById('btnDay').className = '';
     document.getElementById('btnNight').className = 'active-night';
     hf.style.display = 'block'; pf.style.display = 'block';
     cf.style.display = 'block';
+    document.getElementById('clockInWrap').style.display = 'none';
+    document.getElementById('clockArrow').style.display = 'none';
+    document.getElementById('modalClockIn').value = '19:00';
     updatePreview();
   }
 }
