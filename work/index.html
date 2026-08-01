@@ -67,7 +67,6 @@
   .kpi-header h3 { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
   .range-pill { display: flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-family: var(--font); cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-muted); transition: all .12s; }
   .range-pill:hover { border-color: rgba(255,255,255,0.18); color: var(--text-secondary); }
-  .range-pill input[type="date"] { position: absolute; opacity: 0; pointer-events: none; width: 0; }
   .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
   .kpi-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
   .kpi-card .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
@@ -174,7 +173,7 @@
 <div class="kpi-section">
   <div class="kpi-header">
     <h3>📊 统计概览</h3>
-    <button class="range-pill" onclick="pickRange('kpi', this)" id="rangeBtn_kpi">
+    <button class="range-pill" onclick="pickRange('kpi')" id="rangeBtn_kpi">
       <span id="rangeLabel_kpi">--</span>
       <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
     </button>
@@ -209,7 +208,7 @@
   <div class="chart-panel">
     <div class="chart-header">
       <h3>🥧 收入占比</h3>
-      <button class="range-pill" onclick="pickRange('pie', this)" id="rangeBtn_pie">
+      <button class="range-pill" onclick="pickRange('pie')" id="rangeBtn_pie">
         <span id="rangeLabel_pie">--</span>
         <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
       </button>
@@ -221,7 +220,7 @@
   <div class="chart-panel">
     <div class="chart-header">
       <h3>📊 每日收入</h3>
-      <button class="range-pill" onclick="pickRange('bar', this)" id="rangeBtn_bar">
+      <button class="range-pill" onclick="pickRange('bar')" id="rangeBtn_bar">
         <span id="rangeLabel_bar">--</span>
         <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
       </button>
@@ -238,7 +237,7 @@
           <button id="modeCumulative" class="active" onclick="setLineMode('cumulative')">累计</button>
           <button id="modeDaily" onclick="setLineMode('daily')">每日</button>
         </div>
-        <button class="range-pill" onclick="pickRange('line', this)" id="rangeBtn_line">
+        <button class="range-pill" onclick="pickRange('line')" id="rangeBtn_line">
           <span id="rangeLabel_line">--</span>
           <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
         </button>
@@ -312,6 +311,7 @@ const STORAGE_KEY = 'ledger-work';
 const SETTINGS_KEY = 'ledger-work-settings';
 const PER_PAGE = 12;
 const PANELS = ['kpi', 'pie', 'bar', 'line'];
+function syncAllPanelRanges(s, start, end) { PANELS.forEach(k => { s.panelRanges[k] = { start, end }; }); }
 
 // Migrate legacy data (once)
 (function migrate() {
@@ -349,13 +349,13 @@ function deleteRecord(id) { saveData(loadData().filter(r => r.id !== id)); }
 
 // ── Settings ──
 const DEFAULT_SETTINGS = {
-  periods: [{ name: '7/27-8/19', start: '2026-07-27', end: '2026-08-19' }],
+  periods: [{ name: '7/27-8/19', start: DEFAULT_RANGE.start, end: DEFAULT_RANGE.end }],
   activePeriod: 0,
   panelRanges: {
-    kpi: { start: '2026-07-27', end: '2026-08-19' },
-    pie: { start: '2026-07-27', end: '2026-08-19' },
-    bar: { start: '2026-07-27', end: '2026-08-19' },
-    line: { start: '2026-07-27', end: '2026-08-19' },
+    kpi: { ...DEFAULT_RANGE },
+    pie: { ...DEFAULT_RANGE },
+    bar: { ...DEFAULT_RANGE },
+    line: { ...DEFAULT_RANGE },
   },
   lineMode: 'cumulative',
 };
@@ -381,15 +381,24 @@ function getPanelRange(settings, panel) {
   // Fallback to active period
   const ap = settings.periods[settings.activePeriod];
   if (ap) return { start: ap.start, end: ap.end };
-  return { start: '2026-07-27', end: '2026-08-19' };
+  return { ...DEFAULT_RANGE };
 }
 
 function filterByRange(data, start, end) {
   return data.filter(r => r.date >= start && r.date <= end);
 }
 
+// ── Shared helpers ──
+const DEFAULT_RANGE = { start: '2026-07-27', end: '2026-08-19' };
+const TOOLTIP_STYLE = { backgroundColor: '#222221', titleColor: '#fff', bodyColor: '#c3c2b7', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 6, padding: 8 };
+const fmtMD = d => d.split('-').slice(1).join('/');
+const nowISO = () => new Date().toISOString().split('T')[0];
+
+const charts = {};
+function destroyChart(key) { if (charts[key]) { charts[key].destroy(); charts[key] = null; } }
+function setChart(key, c) { destroyChart(key); charts[key] = c; }
+
 // ── Render all ──
-let pieChart, barChart, lineChart;
 
 function renderAll() {
   const settings = loadSettings();
@@ -424,7 +433,7 @@ function selectPeriod(idx) {
   const p = s.periods[idx];
   if (p) {
     // Update all panel ranges to match
-    PANELS.forEach(k => { s.panelRanges[k] = { start: p.start, end: p.end }; });
+    syncAllPanelRanges(s, p.start, p.end);
   }
   saveSettings(s);
   renderAll();
@@ -442,8 +451,8 @@ function deletePeriod(idx) {
 function openPeriodModal() {
   document.getElementById('periodOverlay').classList.add('active');
   document.getElementById('periodName').value = '';
-  document.getElementById('periodStart').value = '2026-07-27';
-  document.getElementById('periodEnd').value = '2026-08-19';
+  document.getElementById('periodStart').value = DEFAULT_RANGE.start;
+  document.getElementById('periodEnd').value = DEFAULT_RANGE.end;
 }
 function closePeriodModal() { document.getElementById('periodOverlay').classList.remove('active'); }
 
@@ -458,14 +467,14 @@ function savePeriod() {
   const autoName = name || (start + ' → ' + end);
   s.periods.push({ name: autoName, start, end });
   s.activePeriod = s.periods.length - 1;
-  PANELS.forEach(k => { s.panelRanges[k] = { start, end }; });
+  syncAllPanelRanges(s, start, end);
   saveSettings(s);
   closePeriodModal();
   renderAll();
 }
 
 // ── Panel range picker ──
-function pickRange(panel, btn) {
+function pickRange(panel) {
   pickingPanel = panel;
   const s = loadSettings();
   const range = getPanelRange(s, panel);
@@ -496,7 +505,7 @@ function closeRangeModal() {
 
 function updateRangeLabel(panel, start, end) {
   const el = document.getElementById('rangeLabel_' + panel);
-  if (el) el.textContent = start.split('-').slice(1).join('/') + ' → ' + end.split('-').slice(1).join('/');
+  if (el) el.textContent = fmtMD(start) + ' → ' + fmtMD(end);
 }
 
 // ── KPI ──
@@ -524,75 +533,66 @@ function renderKPI(data, settings) {
 
 // ── Pie ──
 function renderPieChart(data, settings) {
-  if (pieChart) { pieChart.destroy(); pieChart = null; }
   const range = getPanelRange(settings, 'pie');
   updateRangeLabel('pie', range.start, range.end);
 
   const rd = filterByRange(data, range.start, range.end);
-  const dayEarnings = rd.filter(r => r.type === 'day').length * 150;
-  const nightEarnings = rd.filter(r => r.type === 'night').reduce((s, r) => s + r.earnings, 0);
+  let dayEarnings = 0, nightEarnings = 0;
+  for (const r of rd) {
+    if (r.type === 'day') dayEarnings += 150; else nightEarnings += r.earnings;
+  }
   const total = dayEarnings + nightEarnings;
-
   const ctx = document.getElementById('pieChart').getContext('2d');
+
   if (total === 0) {
-    pieChart = new Chart(ctx, {
+    setChart('pie', new Chart(ctx, {
       type: 'doughnut',
       data: { labels: ['暂无数据'], datasets: [{ data: [1], backgroundColor: ['#2c2c2a'], borderColor: '#1a1a19', borderWidth: 2 }] },
       options: { responsive: true, maintainAspectRatio: true, cutout: '65%', plugins: { legend: { display: false }, tooltip: { enabled: false } } },
-    });
+    }));
     return;
   }
 
-  pieChart = new Chart(ctx, {
+  setChart('pie', new Chart(ctx, {
     type: 'doughnut',
-    data: {
-      labels: ['白班', '晚班'],
-      datasets: [{ data: [dayEarnings, nightEarnings], backgroundColor: ['#3987e5', '#d95926'], borderColor: '#1a1a19', borderWidth: 2 }],
-    },
+    data: { labels: ['白班', '晚班'], datasets: [{ data: [dayEarnings, nightEarnings], backgroundColor: ['#3987e5', '#d95926'], borderColor: '#1a1a19', borderWidth: 2 }] },
     options: {
       responsive: true, maintainAspectRatio: true, cutout: '55%',
       plugins: {
         legend: { position: 'bottom', labels: { color: '#c3c2b7', padding: 16, font: { size: 12 }, usePointStyle: true, pointStyleWidth: 8 } },
-        tooltip: {
-          backgroundColor: '#222221', titleColor: '#fff', bodyColor: '#c3c2b7', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 6, padding: 8,
-          callbacks: { label: ctx => ` ${ctx.label}: ¥${ctx.raw.toLocaleString()} (${((ctx.raw/total)*100).toFixed(1)}%)` },
-        },
+        tooltip: { ...TOOLTIP_STYLE, callbacks: { label: ctx => ` ${ctx.label}: ¥${ctx.raw.toLocaleString()} (${((ctx.raw / total) * 100).toFixed(1)}%)` } },
       },
     },
-  });
+  }));
 }
 
 // ── Bar ──
 function renderBarChart(data, settings) {
-  if (barChart) { barChart.destroy(); barChart = null; }
   const range = getPanelRange(settings, 'bar');
   updateRangeLabel('bar', range.start, range.end);
 
-  // Build date list from range
   const days = [];
   const d = new Date(range.start + 'T00:00:00');
   const end = new Date(range.end + 'T00:00:00');
   while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); }
 
+  const daySet = new Set(days);
   const earningsByDay = {};
-  data.forEach(r => { if (days.includes(r.date)) earningsByDay[r.date] = (earningsByDay[r.date] || 0) + r.earnings; });
-  const values = days.map(d => earningsByDay[d] || 0);
-  const labels = days.map(d => { const p = d.split('-'); return p[1] + '/' + p[2]; });
+  for (const r of data) { if (daySet.has(r.date)) earningsByDay[r.date] = (earningsByDay[r.date] || 0) + r.earnings; }
 
-  // Dynamic bar thickness: more days → thinner bars
+  const values = days.map(d => earningsByDay[d] || 0);
+  const labels = days.map(fmtMD);
   const dayCount = days.length;
   const maxThickness = Math.max(6, Math.min(24, Math.floor(400 / dayCount)));
 
   const ctx = document.getElementById('barChart').getContext('2d');
-  barChart = new Chart(ctx, {
+  setChart('bar', new Chart(ctx, {
     type: 'bar',
     data: {
       labels,
       datasets: [{
-        data: values,
-        backgroundColor: values.map(v => v > 0 ? '#3987e5' : '#2c2c2a'),
-        borderRadius: maxThickness > 8 ? 3 : 2,
-        borderSkipped: false,
+        data: values, backgroundColor: values.map(v => v > 0 ? '#3987e5' : '#2c2c2a'),
+        borderRadius: maxThickness > 8 ? 3 : 2, borderSkipped: false,
         maxBarThickness: maxThickness,
         barPercentage: dayCount <= 7 ? 0.6 : dayCount <= 14 ? 0.8 : 0.95,
         categoryPercentage: dayCount <= 7 ? 0.6 : dayCount <= 14 ? 0.8 : 0.95,
@@ -602,17 +602,14 @@ function renderBarChart(data, settings) {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: {
-          backgroundColor: '#222221', titleColor: '#fff', bodyColor: '#c3c2b7', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 6, padding: 8,
-          callbacks: { title: items => days[items[0].dataIndex], label: ctx => ctx.raw > 0 ? ` ¥${ctx.raw.toLocaleString()}` : ' 休息' },
-        },
+        tooltip: { ...TOOLTIP_STYLE, callbacks: { title: items => days[items[0].dataIndex], label: ctx => ctx.raw > 0 ? ` ¥${ctx.raw.toLocaleString()}` : ' 休息' } },
       },
       scales: {
         x: { grid: { display: false }, ticks: { color: '#898781', font: { size: 10 }, maxTicksLimit: 25, autoSkip: true }, border: { color: '#383835' } },
         y: { grid: { color: '#2c2c2a' }, ticks: { color: '#898781', font: { size: 11 }, callback: v => '¥' + v }, border: { color: '#383835' }, beginAtZero: true },
       },
     },
-  });
+  }));
 }
 
 // ── Line ──
@@ -624,7 +621,6 @@ function setLineMode(mode) {
 }
 
 function renderLineChart(data, settings) {
-  if (lineChart) { lineChart.destroy(); lineChart = null; }
   const range = getPanelRange(settings, 'line');
   const mode = settings.lineMode || 'cumulative';
   updateRangeLabel('line', range.start, range.end);
@@ -637,7 +633,7 @@ function renderLineChart(data, settings) {
   const ctx = document.getElementById('lineChart').getContext('2d');
 
   if (rd.length === 0) {
-    lineChart = new Chart(ctx, {
+    setChart('line', new Chart(ctx, {
       type: 'line',
       data: { labels: [range.start, range.end], datasets: [{ data: [0, 0], borderColor: '#2c2c2a', borderWidth: 2, pointRadius: 0 }] },
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } },
@@ -654,17 +650,17 @@ function renderLineChart(data, settings) {
     labels = []; values = []; let running = 0;
     sortedDates.forEach(date => {
       running += byDate[date];
-      labels.push(date.split('-').slice(1).join('/'));
+      labels.push(fmtMD(date));
       values.push(running);
     });
     color = '#d95926'; bgColor = 'rgba(217,89,38,0.08)';
   } else {
-    labels = sortedDates.map(d => d.split('-').slice(1).join('/'));
+    labels = sortedDates.map(fmtMD);
     values = sortedDates.map(d => byDate[d]);
     color = '#3987e5'; bgColor = 'rgba(57,135,229,0.08)';
   }
 
-  lineChart = new Chart(ctx, {
+  setChart('line', new Chart(ctx, {
     type: 'line',
     data: {
       labels,
@@ -680,8 +676,7 @@ function renderLineChart(data, settings) {
       interaction: { intersect: false, mode: 'index' },
       plugins: {
         legend: { display: false },
-        tooltip: {
-          backgroundColor: '#222221', titleColor: '#fff', bodyColor: color, borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 6, padding: 8, displayColors: false,
+        tooltip: { ...TOOLTIP_STYLE, bodyColor: color, displayColors: false,
           callbacks: { label: ctx => (mode === 'cumulative' ? '累计 ' : '') + '¥' + ctx.raw.toLocaleString() },
         },
       },
@@ -711,7 +706,7 @@ function renderHistory(data) {
 
   const start = (currentPage - 1) * PER_PAGE;
   const pageItems = sorted.slice(start, start + PER_PAGE);
-  const today = new Date().toISOString().split('T')[0];
+  const today = nowISO();
 
   el.innerHTML = pageItems.map(r => {
     const bc = r.type === 'day' ? 'day' : 'night';
@@ -719,7 +714,7 @@ function renderHistory(data) {
     let detail = r.type === 'day' ? '8:20–18:00 · ¥150' : `${r.hours}h · ¥${r.earnings}`;
     if (r.note) detail += ` · ${r.note}`;
     return `<div class="history-item">
-      <span class="history-date">${r.date.split('-').slice(1).join('/')}${r.date === today ? ' <span style="color:var(--series-2);font-size:10px">今天</span>' : ''}</span>
+      <span class="history-date">${fmtMD(r.date)}${r.date === today ? ' <span style="color:var(--series-2);font-size:10px">今天</span>' : ''}</span>
       <span class="shift-badge ${bc}">${bt}</span>
       <span class="history-detail">${detail}</span>
       <span class="history-earnings">¥${r.earnings}</span>
