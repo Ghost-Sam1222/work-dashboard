@@ -183,6 +183,19 @@
   }
   .add-card:hover { border-color: rgba(255,255,255,0.16); color: var(--text-secondary); }
 
+  /* ── Icon picker ── */
+  .icon-preview { width: 52px; height: 52px; border-radius: 14px; background: var(--surface-1); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 10px; background-size: cover; background-position: center; flex-shrink: 0; }
+  .emoji-grid { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+  .emoji-btn { width: 34px; height: 34px; border-radius: 8px; border: 1px solid transparent; background: transparent; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .1s; padding: 0; }
+  .emoji-btn:hover { background: rgba(255,255,255,0.06); border-color: var(--border); }
+  .emoji-btn.selected { background: rgba(57,135,229,0.15); border-color: var(--series-1); }
+  .icon-upload-row { display: flex; align-items: center; gap: 8px; }
+  .icon-upload-row .upload-btn { padding: 5px 12px; font-size: 11px; }
+  .icon-hint { font-size: 10px; color: var(--text-muted); }
+
+  /* Ledger card with image icon */
+  .ledger-icon.img-icon { font-size: 0; }
+
   /* ── Empty state ── */
   .empty-state {
     text-align: center;
@@ -355,7 +368,13 @@
     </div>
     <div class="field">
       <label>图标</label>
-      <input type="text" id="modalIcon" placeholder="如：☀️、✈️、🍜" maxlength="2">
+      <div class="icon-preview" id="createIconPreview">📒</div>
+      <div class="emoji-grid" id="createEmojiGrid"></div>
+      <div class="icon-upload-row">
+        <button class="btn btn-sm btn-ghost upload-btn" onclick="event.preventDefault();triggerUpload('create')">📁 上传图片</button>
+        <span class="icon-hint">推荐 1:1 正方形</span>
+      </div>
+      <input type="hidden" id="modalIcon" value="📒">
     </div>
     <div class="field">
       <label>描述（可选）</label>
@@ -378,7 +397,15 @@
     <h2>编辑子账本</h2>
     <input type="hidden" id="editId">
     <div class="field"><label>名称</label><input type="text" id="editName" placeholder="如：班次收入、出行报销"></div>
-    <div class="field"><label>图标</label><input type="text" id="editIcon" placeholder="如：☀️、✈️、🍜" maxlength="2"></div>
+    <div class="field"><label>图标</label>
+      <div class="icon-preview" id="editIconPreview">📒</div>
+      <div class="emoji-grid" id="editEmojiGrid"></div>
+      <div class="icon-upload-row">
+        <button class="btn btn-sm btn-ghost upload-btn" onclick="event.preventDefault();triggerUpload('edit')">📁 上传图片</button>
+        <span class="icon-hint">推荐 1:1 正方形</span>
+      </div>
+      <input type="hidden" id="editIcon" value="📒">
+    </div>
     <div class="field"><label>描述（可选）</label><input type="text" id="editDesc" placeholder="简要说明这个账本记什么"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeEditModal()">取消</button>
@@ -468,19 +495,19 @@ function renderAll() {
   const cardsHtml = meta.map(l => {
     const stats = getLedgerStats(l.id);
     grandTotal += stats.total;
-    stats.workDays && allWorkDays.add(l.id); // approximate
-    // Better: collect all dates
+    // Count ALL records across all time (not filtered by date range)
     try {
-      const range = getLedgerRange(l.id);
       const data = JSON.parse(localStorage.getItem('ledger-' + l.id)) || [];
-      data.filter(r => r.date >= range.start && r.date <= range.end).forEach(r => allWorkDays.add(r.date));
-      allRecords += data.filter(r => r.date >= range.start && r.date <= range.end).length;
+      data.forEach(r => allWorkDays.add(r.date));
+      allRecords += data.length;
     } catch {}
 
     const preset = l.preset || 1;
+    const iconVal = l.icon || '📒';
+    const isImg = iconVal.startsWith('data:image');
     return `
       <a href="${l.path}/" class="ledger-card">
-        <div class="ledger-icon preset-${preset}">${l.icon || '📒'}</div>
+        <div class="ledger-icon preset-${preset}${isImg ? ' img-icon' : ''}"${isImg ? ` style="background-image:url(${iconVal});background-size:cover"` : ''}>${isImg ? '' : iconVal}</div>
         <div class="ledger-info">
           <div class="name">${escapeHtml(l.name)}</div>
           <div class="meta">${escapeHtml(l.description || '')}</div>
@@ -531,9 +558,11 @@ function escapeHtml(s) {
 function openCreateModal() {
   document.getElementById('overlay').classList.add('active');
   document.getElementById('modalName').value = '';
-  document.getElementById('modalIcon').value = '';
+  document.getElementById('modalIcon').value = '📒';
   document.getElementById('modalDesc').value = '';
   document.getElementById('modalPath').value = '';
+  updateIconPreview('createIconPreview', '📒');
+  buildEmojiPalette('create');
   document.getElementById('modalName').focus();
 }
 
@@ -577,8 +606,10 @@ function openEditModal(id) {
   if (!l) return;
   document.getElementById('editId').value = l.id;
   document.getElementById('editName').value = l.name;
-  document.getElementById('editIcon').value = l.icon || '';
+  document.getElementById('editIcon').value = l.icon || '📒';
   document.getElementById('editDesc').value = l.description || '';
+  updateIconPreview('editIconPreview', l.icon || '📒');
+  buildEmojiPalette('edit');
   document.getElementById('editOverlay').classList.add('active');
   document.getElementById('editName').focus();
 }
@@ -605,6 +636,74 @@ function updateLedger() {
   saveMeta(meta);
   closeEditModal();
   renderAll();
+}
+
+// ── Icon picker ──
+const EMOJI_LIST = ['☀️','💼','🏠','🚗','✈️','🍜','💰','📚','🎮','🎵','💊','🏥','🛒','👕','🎓','🏋️','📱','💻','🎨','🎬','🐱','🐶','🌱','🎁','💡','⚡','🔧','📋','❤️','🏦','🍕','☕','🎂','🏖️','🎯','📊','💳','🏃','🎉','🛏️'];
+
+function buildEmojiPalette(prefix) {
+  const grid = document.getElementById(prefix + 'EmojiGrid');
+  if (!grid) return;
+  const currentVal = document.getElementById(prefix === 'create' ? 'modalIcon' : 'editIcon').value;
+  grid.innerHTML = EMOJI_LIST.map(e =>
+    `<button class="emoji-btn${e === currentVal ? ' selected' : ''}" onclick="selectEmoji('${prefix}','${e}')" title="${e}">${e}</button>`
+  ).join('');
+}
+
+function selectEmoji(prefix, emoji) {
+  const inputId = prefix === 'create' ? 'modalIcon' : 'editIcon';
+  const previewId = prefix + 'IconPreview';
+  document.getElementById(inputId).value = emoji;
+  updateIconPreview(previewId, emoji);
+  buildEmojiPalette(prefix);
+}
+
+function updateIconPreview(previewId, val) {
+  const el = document.getElementById(previewId);
+  if (!el) return;
+  if (val && val.startsWith('data:image')) {
+    el.style.backgroundImage = 'url(' + val + ')';
+    el.textContent = '';
+  } else {
+    el.style.backgroundImage = '';
+    el.textContent = val || '📒';
+  }
+}
+
+function triggerUpload(prefix) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = () => {
+    if (input.files[0]) handleImageUpload(prefix, input.files[0]);
+  };
+  input.click();
+}
+
+function handleImageUpload(prefix, file) {
+  if (file.size > 2 * 1024 * 1024) return alert('图片不能超过 2MB');
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const size = 128;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const min = Math.min(img.width, img.height);
+      const sx = (img.width - min) / 2, sy = (img.height - min) / 2;
+      ctx.fillStyle = '#1a1a19'; ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+      const dataUri = canvas.toDataURL('image/jpeg', 0.85);
+      const inputId = prefix === 'create' ? 'modalIcon' : 'editIcon';
+      const previewId = prefix + 'IconPreview';
+      document.getElementById(inputId).value = dataUri;
+      updateIconPreview(previewId, dataUri);
+      buildEmojiPalette(prefix);
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 // ── Keyboard ──
