@@ -3,13 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>班次收入看板</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js">
-</script>
+<title>总账本</title>
 <style>
   :root {
     color-scheme: dark;
-    /* dataviz palette — dark surface */
     --surface-1:      #1a1a19;
     --surface-2:      #222221;
     --page-plane:     #0d0d0d;
@@ -19,8 +16,10 @@
     --gridline:       #2c2c2a;
     --baseline:       #383835;
     --border:         rgba(255,255,255,0.08);
-    --series-1:       #3987e5;   /* blue — day shift */
-    --series-2:       #d95926;   /* orange — night shift */
+    --series-1:       #3987e5;
+    --series-2:       #d95926;
+    --series-3:       #199e70;
+    --series-4:       #c98500;
     --good:           #0ca30c;
     --warning:        #fab219;
     --critical:       #d03b3b;
@@ -42,177 +41,146 @@
 
   /* ── Header ── */
   .header {
-    padding: 28px 24px 20px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
+    padding: 32px 24px 24px;
+    text-align: center;
   }
-  .header-left h1 {
-    font-size: 22px;
-    font-weight: 640;
-    letter-spacing: -0.01em;
-    color: var(--text-secondary);
+  .header h1 {
+    font-size: 15px;
+    font-weight: 590;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
   }
   .hero-figure {
-    font-size: 56px;
+    font-size: 64px;
     font-weight: 700;
     letter-spacing: -0.02em;
     line-height: 1;
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
   }
-  .hero-figure .currency { font-size: 28px; font-weight: 500; color: var(--text-secondary); margin-right: 2px; }
+  .hero-figure .currency { font-size: 28px; font-weight: 500; color: var(--text-secondary); margin-right: 3px; }
   .hero-label {
     font-size: 13px;
     color: var(--text-muted);
-    margin-top: 4px;
+    margin-top: 6px;
   }
 
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 20px;
-    border-radius: 999px;
-    font-size: 14px;
-    font-weight: 590;
-    font-family: var(--font);
-    cursor: pointer;
-    border: none;
-    transition: opacity .15s, transform .1s;
+  /* ── Sub-ledger grid ── */
+  .ledgers-section {
+    padding: 0 24px 32px;
+    max-width: 720px;
+    margin: 0 auto;
   }
-  .btn:active { transform: scale(0.97); }
-  .btn-primary {
-    background: var(--series-1);
-    color: #fff;
-  }
-  .btn-primary:hover { opacity: .88; }
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-  }
-  .btn-ghost:hover { background: rgba(255,255,255,0.04); }
-  .btn-sm { padding: 5px 12px; font-size: 12px; }
-  .btn-danger { color: var(--critical); border-color: transparent; }
-  .btn-danger:hover { background: rgba(208,59,59,0.12); }
-
-  /* ── KPI Row ── */
-  .kpi-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    padding: 0 24px 24px;
-  }
-  .kpi-card {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-  }
-  .kpi-card .label {
-    font-size: 12px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 6px;
-  }
-  .kpi-card .value {
-    font-size: 28px;
-    font-weight: 680;
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-  }
-  .kpi-card .sub {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-top: 2px;
-  }
-
-  /* ── Charts Grid ── */
-  .charts-grid {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 12px;
-    padding: 0 24px 16px;
-  }
-  .chart-panel {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-  }
-  .chart-panel.full { grid-column: 1 / -1; }
-  .chart-panel h3 {
+  .ledgers-section h2 {
     font-size: 14px;
     font-weight: 600;
     color: var(--text-secondary);
     margin-bottom: 14px;
     letter-spacing: -0.01em;
   }
-  .chart-wrap {
-    position: relative;
-    width: 100%;
-  }
-  .chart-wrap.doughnut {
-    max-width: 260px;
-    margin: 0 auto;
-  }
-  .chart-wrap canvas { width: 100% !important; }
 
-  /* ── History ── */
-  .history-panel {
-    margin: 0 24px 40px;
+  .ledger-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ledger-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
     background: var(--surface-1);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color .15s, background .15s;
+    cursor: pointer;
   }
-  .history-panel h3 {
-    padding: 18px 20px 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-secondary);
+  .ledger-card:hover {
+    border-color: rgba(255,255,255,0.14);
+    background: var(--surface-2);
   }
-  .history-list { max-height: 420px; overflow-y: auto; }
-  .history-item {
+
+  .ledger-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--border);
-    gap: 12px;
-    transition: background .1s;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
   }
-  .history-item:last-child { border-bottom: none; }
-  .history-item:hover { background: rgba(255,255,255,0.02); }
+  .ledger-icon.preset-1 { background: rgba(57,135,229,0.16); }
+  .ledger-icon.preset-2 { background: rgba(217,89,38,0.16); }
+  .ledger-icon.preset-3 { background: rgba(25,158,112,0.16); }
+  .ledger-icon.preset-4 { background: rgba(201,133,0,0.16); }
 
-  .shift-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 999px;
+  .ledger-info { flex: 1; min-width: 0; }
+  .ledger-info .name { font-size: 15px; font-weight: 620; color: var(--text-primary); }
+  .ledger-info .meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ledger-total {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .ledger-total .amount {
+    font-size: 18px;
+    font-weight: 680;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+  .ledger-total .period {
     font-size: 11px;
-    font-weight: 620;
-    letter-spacing: 0.02em;
+    color: var(--text-muted);
   }
-  .shift-badge.day { background: rgba(57,135,229,0.18); color: var(--series-1); }
-  .shift-badge.night { background: rgba(217,89,38,0.18); color: var(--series-2); }
 
-  .history-date { font-weight: 590; font-size: 14px; min-width: 90px; }
-  .history-detail { color: var(--text-secondary); font-size: 13px; flex: 1; }
-  .history-earnings { font-weight: 680; font-size: 15px; font-variant-numeric: tabular-nums; min-width: 70px; text-align: right; }
-  .history-del { cursor: pointer; opacity: 0; transition: opacity .15s; padding: 4px; }
-  .history-item:hover .history-del { opacity: .6; }
-  .history-del:hover { opacity: 1 !important; }
+  .ledger-arrow {
+    color: var(--text-muted);
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .ledger-card:hover .ledger-arrow { opacity: .6; }
 
+  /* ── Add card ── */
+  .add-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 20px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    font-size: 14px;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+    width: 100%;
+  }
+  .add-card:hover { border-color: rgba(255,255,255,0.16); color: var(--text-secondary); }
+
+  /* ── Empty state ── */
   .empty-state {
     text-align: center;
     padding: 48px 20px;
-    color: var(--text-muted);
   }
-  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; }
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 16px; font-weight: 620; color: var(--text-secondary); margin-bottom: 6px; }
+  .empty-state p { font-size: 13px; color: var(--text-muted); }
 
   /* ── Modal ── */
   .overlay {
@@ -230,7 +198,6 @@
     transition: opacity .2s;
   }
   .overlay.active { opacity: 1; pointer-events: auto; }
-
   .modal {
     background: var(--surface-2);
     border: 1px solid var(--border);
@@ -240,15 +207,8 @@
     max-width: 400px;
     box-shadow: 0 24px 48px rgba(0,0,0,0.4);
   }
-  .modal h2 {
-    font-size: 18px;
-    font-weight: 640;
-    margin-bottom: 20px;
-    letter-spacing: -0.01em;
-  }
-  .field {
-    margin-bottom: 16px;
-  }
+  .modal h2 { font-size: 18px; font-weight: 640; margin-bottom: 20px; }
+  .field { margin-bottom: 16px; }
   .field label {
     display: block;
     font-size: 12px;
@@ -270,37 +230,7 @@
     outline: none;
     transition: border-color .15s;
   }
-  .field input:focus, .field select:focus { border-color: var(--series-1); }
-
-  .type-toggle {
-    display: flex;
-    gap: 0;
-    background: var(--surface-1);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    overflow: hidden;
-  }
-  .type-toggle button {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-family: var(--font);
-    font-weight: 590;
-    cursor: pointer;
-    transition: all .15s;
-  }
-  .type-toggle button.active-day {
-    background: var(--series-1);
-    color: #fff;
-  }
-  .type-toggle button.active-night {
-    background: var(--series-2);
-    color: #fff;
-  }
-
+  .field input:focus { border-color: var(--series-1); }
   .modal-actions {
     display: flex;
     gap: 8px;
@@ -308,37 +238,55 @@
     margin-top: 20px;
   }
 
-  .earning-preview {
-    text-align: center;
-    padding: 10px;
-    background: var(--surface-1);
-    border-radius: var(--radius-sm);
-    font-size: 20px;
-    font-weight: 680;
-    color: var(--text-primary);
-    letter-spacing: -0.01em;
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 590;
+    font-family: var(--font);
+    cursor: pointer;
+    border: none;
+    transition: opacity .15s, transform .1s;
   }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--series-1); color: #fff; }
+  .btn-primary:hover { opacity: .88; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.04); }
 
-  /* ── Responsive ── */
-  @media (max-width: 768px) {
-    .header { padding: 20px 16px 16px; }
-    .hero-figure { font-size: 42px; }
-    .hero-figure .currency { font-size: 22px; }
-    .kpi-row {
-      grid-template-columns: repeat(2, 1fr);
-      padding: 0 16px 16px;
-      gap: 8px;
-    }
-    .charts-grid {
-      grid-template-columns: 1fr;
-      padding: 0 16px 8px;
-    }
-    .history-panel { margin: 0 16px 32px; }
-    .chart-wrap.doughnut { max-width: 220px; }
+  /* ── Quick stats ── */
+  .quick-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 720px;
+    margin: 0 auto 24px;
+    padding: 0 24px;
   }
-  @media (max-width: 400px) {
-    .kpi-row { grid-template-columns: 1fr 1fr; }
-    .kpi-card .value { font-size: 22px; }
+  .stat-pill {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .stat-pill .val { font-size: 22px; font-weight: 680; }
+  .stat-pill .lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  @media (max-width: 500px) {
+    .header { padding: 24px 16px 20px; }
+    .hero-figure { font-size: 48px; }
+    .hero-figure .currency { font-size: 22px; }
+    .ledgers-section { padding: 0 16px 24px; }
+    .quick-stats { padding: 0 16px; gap: 8px; }
+    .quick-stats { grid-template-columns: repeat(3, 1fr); }
   }
 </style>
 </head>
@@ -346,577 +294,239 @@
 
 <!-- ── Header ── -->
 <div class="header">
-  <div class="header-left">
-    <h1>班次收入看板</h1>
-    <div class="hero-figure">
-      <span class="currency">¥</span><span id="heroTotal">0</span>
-    </div>
-    <div class="hero-label" id="heroLabel">本月累计收入</div>
+  <h1>💰 总账本</h1>
+  <div class="hero-figure">
+    <span class="currency">¥</span><span id="heroTotal">0</span>
   </div>
-  <button class="btn btn-primary" onclick="openModal()">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
-    添加班次
-  </button>
+  <div class="hero-label" id="heroLabel">全部子账本合计</div>
 </div>
 
-<!-- ── KPI Row ── -->
-<div class="kpi-row">
-  <div class="kpi-card">
-    <div class="label">白班天数</div>
-    <div class="value" id="kpiDayCount">0</div>
-    <div class="sub">150 元/天</div>
+<!-- ── Quick stats ── -->
+<div class="quick-stats" id="quickStats" style="display:none">
+  <div class="stat-pill">
+    <div class="val" id="statLedgerCount">0</div>
+    <div class="lbl">子账本数</div>
   </div>
-  <div class="kpi-card">
-    <div class="label">晚班次数</div>
-    <div class="value" id="kpiNightCount">0</div>
-    <div class="sub">25 元/小时</div>
+  <div class="stat-pill">
+    <div class="val" id="statWorkDays">0</div>
+    <div class="lbl">有记录天数</div>
   </div>
-  <div class="kpi-card">
-    <div class="label">总工时</div>
-    <div class="value" id="kpiHours">0<span style="font-size:16px;font-weight:500;color:var(--text-secondary)"> h</span></div>
-    <div class="sub">晚班累计小时</div>
-  </div>
-  <div class="kpi-card">
-    <div class="label">日均收入</div>
-    <div class="value" id="kpiAvg">¥0</div>
-    <div class="sub" id="kpiAvgLabel">统计天数</div>
+  <div class="stat-pill">
+    <div class="val" id="statRecords">0</div>
+    <div class="lbl">总记录数</div>
   </div>
 </div>
 
-<!-- ── Charts ── -->
-<div class="charts-grid">
-  <div class="chart-panel">
-    <h3>收入占比</h3>
-    <div class="chart-wrap doughnut">
-      <canvas id="pieChart"></canvas>
-    </div>
-  </div>
-  <div class="chart-panel">
-    <h3>每日收入</h3>
-    <div class="chart-wrap">
-      <canvas id="barChart"></canvas>
-    </div>
-  </div>
-  <div class="chart-panel full">
-    <h3>累计收入趋势</h3>
-    <div class="chart-wrap">
-      <canvas id="lineChart"></canvas>
-    </div>
-  </div>
-</div>
-
-<!-- ── History ── -->
-<div class="history-panel">
-  <h3>班次记录</h3>
-  <div class="history-list" id="historyList">
+<!-- ── Sub-ledger list ── -->
+<div class="ledgers-section">
+  <h2>子账本</h2>
+  <div class="ledger-cards" id="ledgerCards">
     <div class="empty-state">
-      <div class="icon">📋</div>
-      <p>暂无记录，点击上方按钮添加班次</p>
+      <div class="icon">📒</div>
+      <h3>还没有子账本</h3>
+      <p>点击下方按钮创建第一个</p>
     </div>
+  </div>
+  <div style="margin-top:12px">
+    <button class="add-card" onclick="openCreateModal()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+      新建子账本
+    </button>
   </div>
 </div>
 
-<!-- ── Modal ── -->
+<!-- ── Create modal ── -->
 <div class="overlay" id="overlay">
   <div class="modal">
-    <h2>添加班次</h2>
+    <h2>新建子账本</h2>
     <div class="field">
-      <label>日期</label>
-      <input type="date" id="modalDate">
+      <label>名称</label>
+      <input type="text" id="modalName" placeholder="如：班次收入、出行报销">
     </div>
     <div class="field">
-      <label>班次类型</label>
-      <div class="type-toggle" id="typeToggle">
-        <button id="btnDay" class="active-day" onclick="setType('day')">☀️ 白班</button>
-        <button id="btnNight" onclick="setType('night')">🌙 晚班</button>
-      </div>
+      <label>图标</label>
+      <input type="text" id="modalIcon" placeholder="如：☀️、✈️、🍜" maxlength="2">
     </div>
-    <div class="field" id="hoursField" style="display:none">
-      <label>晚班时长（小时）</label>
-      <input type="number" id="modalHours" placeholder="如 4、3.5" min="0.5" max="24" step="0.5">
+    <div class="field">
+      <label>描述（可选）</label>
+      <input type="text" id="modalDesc" placeholder="简要说明这个账本记什么">
     </div>
-    <div class="field" id="previewField" style="display:none">
-      <label>预计收入</label>
-      <div class="earning-preview" id="earningPreview">¥0</div>
-    </div>
-    <div class="field" id="noteField">
-      <label>备注（可选）</label>
-      <input type="text" id="modalNote" placeholder="如：替班、加班">
+    <div class="field">
+      <label>子页面路径</label>
+      <input type="text" id="modalPath" placeholder="如：work、travel" pattern="[a-z0-9-]+">
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary" onclick="saveShift()">保存</button>
+      <button class="btn btn-ghost" onclick="closeCreateModal()">取消</button>
+      <button class="btn btn-primary" onclick="createLedger()">创建</button>
     </div>
   </div>
 </div>
 
 <script>
-// ── Data layer ──
-const STORAGE_KEY = 'work-schedule-data';
-let currentType = 'day';
+// ── Ledger registry ──
+const META_KEY = 'ledger-meta';
 
-function loadData() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-  catch { return []; }
+// Default ledgers — seeded once
+const DEFAULT_LEDGERS = [
+  {
+    id: 'work',
+    name: '班次收入',
+    icon: '☀️',
+    description: '白班 150元/天 · 晚班 25元/小时',
+    path: 'work',
+    preset: 1,
+  },
+];
+
+function loadMeta() {
+  try {
+    const raw = localStorage.getItem(META_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  // Seed defaults
+  localStorage.setItem(META_KEY, JSON.stringify(DEFAULT_LEDGERS));
+  return DEFAULT_LEDGERS;
 }
-function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
-function addRecord(record) {
-  const data = loadData();
-  data.push(record);
-  saveData(data);
+function saveMeta(meta) { localStorage.setItem(META_KEY, JSON.stringify(meta)); }
+
+// ── Compute ──
+function getLedgerTotal(ledgerId) {
+  try {
+    const data = JSON.parse(localStorage.getItem('ledger-' + ledgerId)) || [];
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    return data.filter(r => r.date >= monthStart).reduce((s, r) => s + (r.earnings || 0), 0);
+  } catch { return 0; }
 }
 
-function deleteRecord(id) {
-  saveData(loadData().filter(r => r.id !== id));
-}
-
-// ── Compute stats ──
-function getStats(data) {
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-
-  const monthData = data.filter(r => r.date >= monthStart);
-  const dayShifts = monthData.filter(r => r.type === 'day');
-  const nightShifts = monthData.filter(r => r.type === 'night');
-
-  const totalEarnings = monthData.reduce((s, r) => s + r.earnings, 0);
-  const dayCount = dayShifts.length;
-  const nightCount = nightShifts.length;
-  const totalNightHours = nightShifts.reduce((s, r) => s + (r.hours || 0), 0);
-
-  // Unique days with work
-  const workDays = new Set(monthData.map(r => r.date)).size;
-  const avgDaily = workDays > 0 ? Math.round(totalEarnings / workDays) : 0;
-
-  return { totalEarnings, dayCount, nightCount, totalNightHours, avgDaily, workDays, monthStart };
+function getLedgerStats(ledgerId) {
+  try {
+    const data = JSON.parse(localStorage.getItem('ledger-' + ledgerId)) || [];
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const monthData = data.filter(r => r.date >= monthStart);
+    const workDays = new Set(monthData.map(r => r.date)).size;
+    return { total: monthData.reduce((s, r) => s + (r.earnings || 0), 0), workDays, records: monthData.length };
+  } catch { return { total: 0, workDays: 0, records: 0 }; }
 }
 
 // ── Render ──
-let pieChart, barChart, lineChart;
-
 function renderAll() {
-  const data = loadData();
-  const stats = getStats(data);
+  const meta = loadMeta();
+  let grandTotal = 0;
+  let allWorkDays = new Set();
+  let allRecords = 0;
 
-  // Hero
-  document.getElementById('heroTotal').textContent = stats.totalEarnings.toLocaleString();
-  document.getElementById('heroLabel').textContent =
-    `本月累计收入（${stats.monthStart} 起）`;
+  const cardsHtml = meta.map(l => {
+    const stats = getLedgerStats(l.id);
+    grandTotal += stats.total;
+    stats.workDays && allWorkDays.add(l.id); // approximate
+    // Better: collect all dates
+    try {
+      const data = JSON.parse(localStorage.getItem('ledger-' + l.id)) || [];
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      data.filter(r => r.date >= monthStart).forEach(r => allWorkDays.add(r.date));
+      allRecords += data.filter(r => r.date >= monthStart).length;
+    } catch {}
 
-  // KPI
-  document.getElementById('kpiDayCount').textContent = stats.dayCount;
-  document.getElementById('kpiNightCount').textContent = stats.nightCount;
-  document.getElementById('kpiHours').innerHTML = stats.totalNightHours + '<span style="font-size:16px;font-weight:500;color:var(--text-secondary)"> h</span>';
-  document.getElementById('kpiAvg').textContent = '¥' + stats.avgDaily.toLocaleString();
-  document.getElementById('kpiAvgLabel').textContent = stats.workDays + ' 个工作日';
-
-  // Charts
-  renderPieChart(stats);
-  renderBarChart(data);
-  renderLineChart(data);
-  renderHistory(data);
-}
-
-function destroyChart(key) {
-  if (key === 'pie' && pieChart) { pieChart.destroy(); pieChart = null; }
-  if (key === 'bar' && barChart) { barChart.destroy(); barChart = null; }
-  if (key === 'line' && lineChart) { lineChart.destroy(); lineChart = null; }
-}
-
-function renderPieChart(stats) {
-  destroyChart('pie');
-  const ctx = document.getElementById('pieChart').getContext('2d');
-
-  const dayEarnings = stats.dayCount * 150;
-  const nightEarnings = stats.nightCount > 0
-    ? loadData().filter(r => r.type === 'night' && r.date >= stats.monthStart).reduce((s, r) => s + r.earnings, 0)
-    : 0;
-
-  if (dayEarnings === 0 && nightEarnings === 0) {
-    pieChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['暂无数据'],
-        datasets: [{
-          data: [1],
-          backgroundColor: ['#2c2c2a'],
-          borderColor: '#1a1a19',
-          borderWidth: 2,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        cutout: '65%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false },
-        },
-      },
-    });
-    return;
-  }
-
-  pieChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['白班', '晚班'],
-      datasets: [{
-        data: [dayEarnings, nightEarnings],
-        backgroundColor: ['#3987e5', '#d95926'],
-        borderColor: '#1a1a19',
-        borderWidth: 2,
-        hoverBorderWidth: 2,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      cutout: '58%',
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            color: '#c3c2b7',
-            padding: 20,
-            font: { family: "system-ui, sans-serif", size: 13 },
-            usePointStyle: true,
-            pointStyleWidth: 10,
-          },
-        },
-        tooltip: {
-          backgroundColor: '#222221',
-          titleColor: '#ffffff',
-          bodyColor: '#c3c2b7',
-          borderColor: 'rgba(255,255,255,0.08)',
-          borderWidth: 1,
-          cornerRadius: 8,
-          padding: 10,
-          callbacks: {
-            label: ctx => ` ${ctx.label}: ¥${ctx.raw.toLocaleString()}（${((ctx.raw / (dayEarnings + nightEarnings)) * 100).toFixed(1)}%）`,
-          },
-        },
-      },
-    },
-  });
-}
-
-function renderBarChart(data) {
-  destroyChart('bar');
-  const ctx = document.getElementById('barChart').getContext('2d');
-
-  // Last 30 days
-  const days = [];
-  const now = new Date();
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    days.push(d.toISOString().split('T')[0]);
-  }
-
-  const earningsByDay = {};
-  data.forEach(r => {
-    if (days.includes(r.date)) {
-      earningsByDay[r.date] = (earningsByDay[r.date] || 0) + r.earnings;
-    }
-  });
-
-  const values = days.map(d => earningsByDay[d] || 0);
-  const labels = days.map(d => {
-    const parts = d.split('-');
-    return parts[1] + '/' + parts[2]; // MM/DD
-  });
-
-  const hasData = values.some(v => v > 0);
-
-  barChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        data: values,
-        backgroundColor: values.map(v => v > 0 ? '#3987e5' : '#2c2c2a'),
-        borderRadius: 4,
-        borderSkipped: false,
-        maxBarThickness: 24,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#222221',
-          titleColor: '#ffffff',
-          bodyColor: '#c3c2b7',
-          borderColor: 'rgba(255,255,255,0.08)',
-          borderWidth: 1,
-          cornerRadius: 8,
-          padding: 10,
-          callbacks: {
-            title: items => days[items[0].dataIndex],
-            label: ctx => ctx.raw > 0 ? ` ¥${ctx.raw.toLocaleString()}` : ' 无班次',
-          },
-        },
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: {
-            color: '#898781',
-            font: { size: 10 },
-            maxTicksLimit: 15,
-            autoSkip: true,
-          },
-          border: { color: '#383835' },
-        },
-        y: {
-          grid: { color: '#2c2c2a' },
-          ticks: {
-            color: '#898781',
-            font: { size: 11 },
-            callback: v => '¥' + v,
-          },
-          border: { color: '#383835' },
-          beginAtZero: true,
-        },
-      },
-    },
-  });
-}
-
-function renderLineChart(data) {
-  destroyChart('line');
-  const ctx = document.getElementById('lineChart').getContext('2d');
-
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-  const monthData = data.filter(r => r.date >= monthStart).sort((a, b) => a.date.localeCompare(b.date));
-
-  if (monthData.length === 0) {
-    lineChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [monthStart, now.toISOString().split('T')[0]],
-        datasets: [{
-          data: [0, 0],
-          borderColor: '#2c2c2a',
-          borderWidth: 2,
-          pointRadius: 0,
-          tension: 0.3,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { enabled: false } },
-        scales: {
-          x: { display: false },
-          y: { display: false },
-        },
-      },
-    });
-    return;
-  }
-
-  // Cumulative earnings
-  const labels = [];
-  const cumulative = [];
-  let running = 0;
-
-  // Group by date
-  const byDate = {};
-  monthData.forEach(r => {
-    byDate[r.date] = (byDate[r.date] || 0) + r.earnings;
-  });
-
-  const sortedDates = Object.keys(byDate).sort();
-  sortedDates.forEach(date => {
-    running += byDate[date];
-    labels.push(date.split('-').slice(1).join('/'));
-    cumulative.push(running);
-  });
-
-  lineChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: '累计收入',
-        data: cumulative,
-        borderColor: '#d95926',
-        backgroundColor: 'rgba(217,89,38,0.08)',
-        borderWidth: 2,
-        pointRadius: 4,
-        pointBackgroundColor: '#d95926',
-        pointBorderColor: '#1a1a19',
-        pointBorderWidth: 2,
-        pointHoverRadius: 8,
-        fill: true,
-        tension: 0.3,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        intersect: false,
-        mode: 'index',
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#222221',
-          titleColor: '#ffffff',
-          bodyColor: '#d95926',
-          borderColor: 'rgba(255,255,255,0.08)',
-          borderWidth: 1,
-          cornerRadius: 8,
-          padding: 10,
-          displayColors: false,
-          callbacks: {
-            label: ctx => `累计 ¥${ctx.raw.toLocaleString()}`,
-          },
-        },
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: { color: '#898781', font: { size: 11 }, maxTicksLimit: 15 },
-          border: { color: '#383835' },
-        },
-        y: {
-          grid: { color: '#2c2c2a' },
-          ticks: {
-            color: '#898781',
-            font: { size: 11 },
-            callback: v => '¥' + v.toLocaleString(),
-          },
-          border: { color: '#383835' },
-          beginAtZero: true,
-        },
-      },
-    },
-  });
-}
-
-function renderHistory(data) {
-  const el = document.getElementById('historyList');
-  const sorted = [...data].sort((a, b) => b.date.localeCompare(a.date));
-
-  if (sorted.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>暂无记录，点击上方按钮添加班次</p></div>`;
-    return;
-  }
-
-  el.innerHTML = sorted.map(r => {
-    const badgeClass = r.type === 'day' ? 'day' : 'night';
-    const badgeText = r.type === 'day' ? '☀️ 白班' : '🌙 晚班';
-    let detailText = r.type === 'day'
-      ? '8:20 — 18:00 · 150 元'
-      : `${r.hours} 小时 · ¥${r.earnings}`;
-    if (r.note) detailText += ` · ${r.note}`;
-    const dateDisplay = r.date.split('-').slice(1).join('/');
-
+    const preset = l.preset || 1;
     return `
-      <div class="history-item">
-        <span class="history-date">${dateDisplay}</span>
-        <span class="shift-badge ${badgeClass}">${badgeText}</span>
-        <span class="history-detail">${detailText}</span>
-        <span class="history-earnings">¥${r.earnings}</span>
-        <span class="history-del" title="删除" onclick="event.stopPropagation(); removeShift('${r.id}')">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="4" x2="14" y2="4"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5"/><line x1="3" y1="4" x2="13" y2="4" stroke="#d03b3b"/></svg>
+      <a href="${l.path}/" class="ledger-card">
+        <div class="ledger-icon preset-${preset}">${l.icon || '📒'}</div>
+        <div class="ledger-info">
+          <div class="name">${escapeHtml(l.name)}</div>
+          <div class="meta">${escapeHtml(l.description || '')}</div>
+        </div>
+        <div class="ledger-total">
+          <div class="amount">¥${stats.total.toLocaleString()}</div>
+          <div class="period">本月</div>
+        </div>
+        <span class="ledger-arrow">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
         </span>
-      </div>`;
+      </a>`;
   }).join('');
+
+  document.getElementById('heroTotal').textContent = grandTotal.toLocaleString();
+  document.getElementById('heroLabel').textContent =
+    meta.length === 0 ? '还没有子账本' : `${meta.length} 个子账本 · 本月合计`;
+
+  const cardsEl = document.getElementById('ledgerCards');
+  if (meta.length === 0) {
+    cardsEl.innerHTML = `<div class="empty-state"><div class="icon">📒</div><h3>还没有子账本</h3><p>点击下方按钮创建第一个</p></div>`;
+  } else {
+    cardsEl.innerHTML = cardsHtml;
+  }
+
+  // Quick stats
+  const qs = document.getElementById('quickStats');
+  if (meta.length === 0) {
+    qs.style.display = 'none';
+  } else {
+    qs.style.display = 'grid';
+    document.getElementById('statLedgerCount').textContent = meta.length;
+    document.getElementById('statWorkDays').textContent = allWorkDays.size;
+    document.getElementById('statRecords').textContent = allRecords;
+  }
 }
 
-// ── Modal logic ──
-function openModal() {
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ── Create modal ──
+function openCreateModal() {
   document.getElementById('overlay').classList.add('active');
-  document.getElementById('modalDate').value = new Date().toISOString().split('T')[0];
-  setType('day');
-  document.getElementById('modalHours').value = '';
-  document.getElementById('modalNote').value = '';
+  document.getElementById('modalName').value = '';
+  document.getElementById('modalIcon').value = '';
+  document.getElementById('modalDesc').value = '';
+  document.getElementById('modalPath').value = '';
+  document.getElementById('modalName').focus();
 }
 
-function closeModal() {
+function closeCreateModal() {
   document.getElementById('overlay').classList.remove('active');
 }
 
-function setType(type) {
-  currentType = type;
-  const btnDay = document.getElementById('btnDay');
-  const btnNight = document.getElementById('btnNight');
-  const hoursField = document.getElementById('hoursField');
-  const previewField = document.getElementById('previewField');
+function createLedger() {
+  const name = document.getElementById('modalName').value.trim();
+  const icon = document.getElementById('modalIcon').value.trim() || '📒';
+  const description = document.getElementById('modalDesc').value.trim();
+  const path = document.getElementById('modalPath').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
 
-  if (type === 'day') {
-    btnDay.className = 'active-day';
-    btnNight.className = '';
-    hoursField.style.display = 'none';
-    previewField.style.display = 'none';
-    document.getElementById('modalHours').value = '';
-    document.getElementById('earningPreview').textContent = '¥150';
-  } else {
-    btnDay.className = '';
-    btnNight.className = 'active-night';
-    hoursField.style.display = 'block';
-    previewField.style.display = 'block';
-    updatePreview();
-  }
-}
+  if (!name) return alert('请输入名称');
+  if (!path) return alert('请输入子页面路径');
 
-function updatePreview() {
-  const hours = parseFloat(document.getElementById('modalHours').value) || 0;
-  document.getElementById('earningPreview').textContent = '¥' + (hours * 25);
-}
-
-document.getElementById('modalHours').addEventListener('input', updatePreview);
-
-function saveShift() {
-  const date = document.getElementById('modalDate').value;
-  if (!date) return alert('请选择日期');
-
-  let hours = 0, earnings = 0;
-  if (currentType === 'day') {
-    earnings = 150;
-  } else {
-    hours = parseFloat(document.getElementById('modalHours').value);
-    if (!hours || hours <= 0) return alert('请输入晚班时长');
-    earnings = Math.round(hours * 25);
+  const meta = loadMeta();
+  if (meta.find(l => l.id === path || l.path === path)) {
+    return alert('该路径已存在，请换一个');
   }
 
-  const note = document.getElementById('modalNote').value.trim();
-  const record = {
-    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    date,
-    type: currentType,
-    hours: currentType === 'night' ? hours : 0,
-    earnings,
-    note: note || '',
+  const newLedger = {
+    id: path,
+    name,
+    icon,
+    description,
+    path,
+    preset: (meta.length % 4) + 1,
   };
 
-  addRecord(record);
-  closeModal();
-  renderAll();
-}
-
-function removeShift(id) {
-  if (!confirm('确定删除这条记录吗？')) return;
-  deleteRecord(id);
+  meta.push(newLedger);
+  saveMeta(meta);
+  closeCreateModal();
   renderAll();
 }
 
 // ── Keyboard ──
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Escape') closeCreateModal();
 });
-
 document.getElementById('overlay').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeModal();
+  if (e.target === e.currentTarget) closeCreateModal();
 });
 
 // ── Init ──
