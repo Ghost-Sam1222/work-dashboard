@@ -178,8 +178,6 @@
       <span id="rangeLabel_kpi">--</span>
       <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
     </button>
-    <input type="date" id="dr_kpi_start" style="display:none" onchange="onPanelRangeChange('kpi')">
-    <input type="date" id="dr_kpi_end" style="display:none" onchange="onPanelRangeChange('kpi')">
   </div>
   <div class="kpi-row">
     <div class="kpi-card">
@@ -215,8 +213,6 @@
         <span id="rangeLabel_pie">--</span>
         <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
       </button>
-      <input type="date" id="dr_pie_start" style="display:none" onchange="onPanelRangeChange('pie')">
-      <input type="date" id="dr_pie_end" style="display:none" onchange="onPanelRangeChange('pie')">
     </div>
     <div class="chart-wrap doughnut"><canvas id="pieChart"></canvas></div>
   </div>
@@ -229,8 +225,6 @@
         <span id="rangeLabel_bar">--</span>
         <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
       </button>
-      <input type="date" id="dr_bar_start" style="display:none" onchange="onPanelRangeChange('bar')">
-      <input type="date" id="dr_bar_end" style="display:none" onchange="onPanelRangeChange('bar')">
     </div>
     <div class="chart-wrap"><canvas id="barChart"></canvas></div>
   </div>
@@ -248,8 +242,6 @@
           <span id="rangeLabel_line">--</span>
           <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
         </button>
-        <input type="date" id="dr_line_start" style="display:none" onchange="onPanelRangeChange('line')">
-        <input type="date" id="dr_line_end" style="display:none" onchange="onPanelRangeChange('line')">
       </div>
     </div>
     <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
@@ -297,6 +289,19 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closePeriodModal()">取消</button>
       <button class="btn btn-primary" onclick="savePeriod()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Range Picker Modal ── -->
+<div class="overlay" id="rangeOverlay">
+  <div class="modal">
+    <h2>选择统计区间</h2>
+    <div class="field"><label>起始日期</label><input type="date" id="rangeStart"></div>
+    <div class="field"><label>结束日期</label><input type="date" id="rangeEnd"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeRangeModal()">取消</button>
+      <button class="btn btn-primary" onclick="applyRange()">确定</button>
     </div>
   </div>
 </div>
@@ -432,23 +437,32 @@ function savePeriod() {
 
 // ── Panel range picker ──
 function pickRange(panel, btn) {
+  pickingPanel = panel;
   const s = loadSettings();
   const range = getPanelRange(s, panel);
-  const startInput = document.getElementById('dr_' + panel + '_start');
-  const endInput = document.getElementById('dr_' + panel + '_end');
-  startInput.value = range.start;
-  endInput.value = range.end;
-  startInput.showPicker ? startInput.showPicker() : startInput.click();
+  // Show a temp modal with date inputs
+  document.getElementById('rangeStart').value = range.start;
+  document.getElementById('rangeEnd').value = range.end;
+  document.getElementById('rangeOverlay').classList.add('active');
 }
 
-function onPanelRangeChange(panel) {
-  const start = document.getElementById('dr_' + panel + '_start').value;
-  const end = document.getElementById('dr_' + panel + '_end').value;
+function applyRange() {
+  if (!pickingPanel) return;
+  const start = document.getElementById('rangeStart').value;
+  const end = document.getElementById('rangeEnd').value;
   if (!start || !end) return;
+  if (start > end) return alert('起始日期不能晚于结束日期');
   const s = loadSettings();
-  s.panelRanges[panel] = { start, end };
+  s.panelRanges[pickingPanel] = { start, end };
   saveSettings(s);
+  document.getElementById('rangeOverlay').classList.remove('active');
+  pickingPanel = null;
   renderAll();
+}
+
+function closeRangeModal() {
+  document.getElementById('rangeOverlay').classList.remove('active');
+  pickingPanel = null;
 }
 
 function updateRangeLabel(panel, start, end) {
@@ -744,9 +758,10 @@ function saveShift() {
 function removeShift(id) { if (!confirm('确定删除？')) return; deleteRecord(id); renderAll(); }
 
 // ── Keyboard ──
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeShiftModal(); closePeriodModal(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeShiftModal(); closePeriodModal(); closeRangeModal(); } });
 document.getElementById('shiftOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeShiftModal(); });
 document.getElementById('periodOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closePeriodModal(); });
+document.getElementById('rangeOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeRangeModal(); });
 
 // ── Init ──
 renderAll();
