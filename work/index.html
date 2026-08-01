@@ -27,133 +27,119 @@
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: var(--font);
-    background: var(--page-plane);
-    color: var(--text-primary);
-    min-height: 100vh;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
+  body { font-family: var(--font); background: var(--page-plane); color: var(--text-primary); min-height: 100vh; line-height: 1.5; -webkit-font-smoothing: antialiased; }
 
   /* ── Header ── */
-  .back-link { color: var(--text-muted); display: flex; align-items: center; padding: 6px; margin-right: 8px; border-radius: 8px; transition: color .15s, background .15s; flex-shrink: 0; margin-bottom: 2px; }
+  .back-link { color: var(--text-muted); display: flex; align-items: center; padding: 6px; margin-right: 8px; border-radius: 8px; transition: color .15s, background .15s; flex-shrink: 0; }
   .back-link:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
-  .header { padding: 28px 24px 20px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .header { padding: 24px 24px 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   .header-top { display: flex; align-items: flex-end; }
-  .header-left h1 { font-size: 22px; font-weight: 640; letter-spacing: -0.01em; color: var(--text-secondary); }
-  .hero-figure { font-size: 56px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; color: var(--text-primary); font-variant-numeric: tabular-nums; }
-  .hero-figure .currency { font-size: 28px; font-weight: 500; color: var(--text-secondary); margin-right: 2px; }
-  .hero-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .header-left h1 { font-size: 16px; font-weight: 620; letter-spacing: -0.01em; color: var(--text-muted); }
+  .hero-figure { font-size: 50px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .hero-figure .currency { font-size: 24px; font-weight: 500; color: var(--text-secondary); margin-right: 2px; }
+  .hero-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 999px; font-size: 14px; font-weight: 590; font-family: var(--font); cursor: pointer; border: none; transition: opacity .15s, transform .1s; }
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 590; font-family: var(--font); cursor: pointer; border: none; transition: opacity .15s, transform .1s; white-space: nowrap; }
   .btn:active { transform: scale(0.97); }
   .btn-primary { background: var(--series-1); color: #fff; }
   .btn-primary:hover { opacity: .88; }
   .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
   .btn-ghost:hover { background: rgba(255,255,255,0.04); }
-  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+  .btn-xs { padding: 3px 8px; font-size: 10px; border-radius: 6px; }
 
-  /* ── Date range bar ── */
-  .date-range-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 0 24px 20px;
-    flex-wrap: wrap;
-  }
-  .date-range-bar .dr-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
-  .date-range-bar input[type="date"] {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    color: var(--text-primary);
-    font-size: 13px;
-    font-family: var(--font);
-    padding: 6px 14px;
-    outline: none;
-    width: 140px;
-  }
-  .date-range-bar input[type="date"]:focus { border-color: var(--series-1); }
-  .date-range-bar .dr-sep { color: var(--text-muted); font-size: 13px; }
-  .dr-summary { font-size: 12px; color: var(--text-muted); }
+  /* ── Period bar ── */
+  .period-bar { display: flex; align-items: center; gap: 8px; padding: 0 24px 16px; flex-wrap: wrap; }
+  .period-bar .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+  .period-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .period-pill { padding: 5px 14px; border-radius: 999px; font-size: 12px; font-weight: 590; font-family: var(--font); cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); transition: all .12s; white-space: nowrap; }
+  .period-pill:hover { border-color: rgba(255,255,255,0.18); color: var(--text-primary); }
+  .period-pill.active { background: var(--series-1); border-color: var(--series-1); color: #fff; }
+  .period-pill .del { margin-left: 4px; opacity: 0; transition: opacity .12s; font-size: 11px; }
+  .period-pill:hover .del { opacity: .5; }
+  .period-pill .del:hover { opacity: 1; color: var(--critical); }
+  .add-period-btn { padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 590; font-family: var(--font); cursor: pointer; border: 1px dashed var(--border); background: transparent; color: var(--text-muted); transition: all .12s; white-space: nowrap; }
+  .add-period-btn:hover { border-color: rgba(255,255,255,0.16); color: var(--text-secondary); }
 
   /* ── KPI Row ── */
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 24px 24px; }
-  .kpi-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
-  .kpi-card .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
-  .kpi-card .value { font-size: 28px; font-weight: 680; color: var(--text-primary); font-variant-numeric: tabular-nums; }
-  .kpi-card .sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .kpi-section { padding: 0 24px 16px; }
+  .kpi-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .kpi-header h3 { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+  .range-pill { display: flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-family: var(--font); cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-muted); transition: all .12s; }
+  .range-pill:hover { border-color: rgba(255,255,255,0.18); color: var(--text-secondary); }
+  .range-pill input[type="date"] { position: absolute; opacity: 0; pointer-events: none; width: 0; }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .kpi-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+  .kpi-card .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .kpi-card .value { font-size: 26px; font-weight: 680; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .kpi-card .sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
 
   /* ── Charts Grid ── */
   .charts-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; padding: 0 24px 16px; }
-  .chart-panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .chart-panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
   .chart-panel.full { grid-column: 1 / -1; }
-  .chart-panel h3 { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 14px; }
+  .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+  .chart-header h3 { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+  .chart-header-right { display: flex; align-items: center; gap: 6px; }
+  .mode-toggle { display: flex; border-radius: 999px; overflow: hidden; border: 1px solid var(--border); }
+  .mode-toggle button { padding: 3px 12px; border: none; background: transparent; color: var(--text-muted); font-size: 11px; font-family: var(--font); font-weight: 590; cursor: pointer; transition: all .12s; }
+  .mode-toggle button.active { background: var(--series-1); color: #fff; }
   .chart-wrap { position: relative; width: 100%; }
-  .chart-wrap.doughnut { max-width: 260px; margin: 0 auto; }
+  .chart-wrap.doughnut { max-width: 240px; margin: 0 auto; }
   .chart-wrap canvas { width: 100% !important; }
 
   /* ── History ── */
   .history-panel { margin: 0 24px 16px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-  .history-panel h3 { padding: 18px 20px 12px; font-size: 14px; font-weight: 600; color: var(--text-secondary); }
-  .history-item { display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border); gap: 12px; transition: background .1s; }
+  .history-panel h3 { padding: 16px 20px 10px; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+  .history-item { display: flex; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--border); gap: 10px; transition: background .1s; }
   .history-item:last-child { border-bottom: none; }
   .history-item:hover { background: rgba(255,255,255,0.02); }
-
-  .shift-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 620; letter-spacing: 0.02em; }
+  .shift-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 620; }
   .shift-badge.day { background: rgba(57,135,229,0.18); color: var(--series-1); }
   .shift-badge.night { background: rgba(217,89,38,0.18); color: var(--series-2); }
-
-  .history-date { font-weight: 590; font-size: 14px; min-width: 90px; }
-  .history-detail { color: var(--text-secondary); font-size: 13px; flex: 1; }
-  .history-earnings { font-weight: 680; font-size: 15px; font-variant-numeric: tabular-nums; min-width: 70px; text-align: right; }
-  .history-del { cursor: pointer; opacity: 0; transition: opacity .15s; padding: 4px; }
-  .history-item:hover .history-del { opacity: .6; }
+  .history-date { font-weight: 590; font-size: 13px; min-width: 75px; }
+  .history-detail { color: var(--text-secondary); font-size: 12px; flex: 1; }
+  .history-earnings { font-weight: 680; font-size: 14px; font-variant-numeric: tabular-nums; min-width: 60px; text-align: right; }
+  .history-del { cursor: pointer; opacity: 0; transition: opacity .15s; padding: 2px; }
+  .history-item:hover .history-del { opacity: .5; }
   .history-del:hover { opacity: 1 !important; }
-
-  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
-  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  .empty-state .icon { font-size: 36px; margin-bottom: 10px; }
+  .empty-state p { font-size: 13px; }
 
   /* ── Pagination ── */
-  .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--border); }
-  .pagination .page-btn { padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 590; font-family: var(--font); cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); transition: all .12s; }
+  .pagination { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 20px; border-top: 1px solid var(--border); }
+  .pagination .page-btn { padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 590; font-family: var(--font); cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); transition: all .12s; }
   .pagination .page-btn:hover:not(:disabled) { background: rgba(255,255,255,0.05); color: var(--text-primary); }
   .pagination .page-btn:disabled { opacity: 0.3; cursor: default; }
-  .pagination .page-info { font-size: 12px; color: var(--text-muted); min-width: 80px; text-align: center; }
+  .pagination .page-info { font-size: 11px; color: var(--text-muted); min-width: 60px; text-align: center; }
 
   /* ── Modal ── */
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s; }
   .overlay.active { opacity: 1; pointer-events: auto; }
-  .modal { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; width: 90%; max-width: 400px; box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
-  .modal h2 { font-size: 18px; font-weight: 640; margin-bottom: 20px; }
-  .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 12px; font-weight: 590; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .field input, .field select { width: 100%; padding: 10px 14px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 15px; font-family: var(--font); outline: none; transition: border-color .15s; }
+  .modal { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 90%; max-width: 380px; box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+  .modal h2 { font-size: 17px; font-weight: 640; margin-bottom: 18px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 11px; font-weight: 590; color: var(--text-secondary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .field input, .field select { width: 100%; padding: 9px 12px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 14px; font-family: var(--font); outline: none; transition: border-color .15s; }
   .field input:focus, .field select:focus { border-color: var(--series-1); }
-
   .type-toggle { display: flex; gap: 0; background: var(--surface-1); border-radius: var(--radius-sm); border: 1px solid var(--border); overflow: hidden; }
-  .type-toggle button { flex: 1; padding: 10px; border: none; background: transparent; color: var(--text-secondary); font-size: 14px; font-family: var(--font); font-weight: 590; cursor: pointer; transition: all .15s; }
+  .type-toggle button { flex: 1; padding: 9px; border: none; background: transparent; color: var(--text-secondary); font-size: 13px; font-family: var(--font); font-weight: 590; cursor: pointer; transition: all .15s; }
   .type-toggle button.active-day { background: var(--series-1); color: #fff; }
   .type-toggle button.active-night { background: var(--series-2); color: #fff; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+  .earning-preview { text-align: center; padding: 8px; background: var(--surface-1); border-radius: var(--radius-sm); font-size: 18px; font-weight: 680; color: var(--text-primary); }
 
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
-  .earning-preview { text-align: center; padding: 10px; background: var(--surface-1); border-radius: var(--radius-sm); font-size: 20px; font-weight: 680; color: var(--text-primary); }
-
-  /* ── Responsive ── */
   @media (max-width: 768px) {
-    .header { padding: 20px 16px 16px; }
-    .hero-figure { font-size: 42px; }
-    .hero-figure .currency { font-size: 22px; }
-    .kpi-row { grid-template-columns: repeat(2, 1fr); padding: 0 16px 16px; gap: 8px; }
+    .header { padding: 18px 16px 12px; }
+    .hero-figure { font-size: 38px; }
+    .hero-figure .currency { font-size: 20px; }
+    .period-bar { padding: 0 16px 12px; }
+    .kpi-section { padding: 0 16px 12px; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .charts-grid { grid-template-columns: 1fr; padding: 0 16px 8px; }
     .history-panel { margin: 0 16px 16px; }
-    .chart-wrap.doughnut { max-width: 220px; }
-    .date-range-bar { padding: 0 16px 16px; }
-    .date-range-bar input[type="date"] { width: 120px; }
+    .chart-wrap.doughnut { max-width: 200px; }
   }
 </style>
 </head>
@@ -163,82 +149,118 @@
 <div class="header">
   <div class="header-top">
     <a href="../" class="back-link" title="返回总账本">
-      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3L5 8l6 5"/></svg>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3L5 8l6 5"/></svg>
     </a>
     <div class="header-left">
       <h1>班次收入</h1>
-      <div class="hero-figure">
-        <span class="currency">¥</span><span id="heroTotal">0</span>
-      </div>
-      <div class="hero-label" id="heroLabel">统计区间收入</div>
+      <div class="hero-figure"><span class="currency">¥</span><span id="heroTotal">0</span></div>
+      <div class="hero-label">手动选择统计区间</div>
     </div>
   </div>
-  <button class="btn btn-primary" onclick="openModal()">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+  <button class="btn btn-primary" onclick="openShiftModal()">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
     添加班次
   </button>
 </div>
 
-<!-- ── Date Range ── -->
-<div class="date-range-bar">
-  <span class="dr-label">统计区间</span>
-  <input type="date" id="drStart" onchange="onDateRangeChange()">
-  <span class="dr-sep">→</span>
-  <input type="date" id="drEnd" onchange="onDateRangeChange()">
-  <span class="dr-summary" id="drSummary"></span>
+<!-- ── Period bar ── -->
+<div class="period-bar">
+  <span class="label">工期</span>
+  <div class="period-pills" id="periodPills"></div>
+  <button class="add-period-btn" onclick="openPeriodModal()">+ 新建</button>
 </div>
 
-<!-- ── KPI Row ── -->
-<div class="kpi-row">
-  <div class="kpi-card">
-    <div class="label">白班天数</div>
-    <div class="value" id="kpiDayCount">0</div>
-    <div class="sub">150 元/天</div>
+<!-- ════ 板块1: KPI ════ -->
+<div class="kpi-section">
+  <div class="kpi-header">
+    <h3>📊 统计概览</h3>
+    <button class="range-pill" onclick="pickRange('kpi', this)" id="rangeBtn_kpi">
+      <span id="rangeLabel_kpi">--</span>
+      <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+    </button>
+    <input type="date" id="dr_kpi_start" style="display:none" onchange="onPanelRangeChange('kpi')">
+    <input type="date" id="dr_kpi_end" style="display:none" onchange="onPanelRangeChange('kpi')">
   </div>
-  <div class="kpi-card">
-    <div class="label">晚班次数</div>
-    <div class="value" id="kpiNightCount">0</div>
-    <div class="sub">25 元/小时</div>
-  </div>
-  <div class="kpi-card">
-    <div class="label">晚班总工时</div>
-    <div class="value" id="kpiHours">0<span style="font-size:16px;font-weight:500;color:var(--text-secondary)"> h</span></div>
-    <div class="sub">晚班累计小时</div>
-  </div>
-  <div class="kpi-card">
-    <div class="label">日均收入</div>
-    <div class="value" id="kpiAvg">¥0</div>
-    <div class="sub" id="kpiAvgLabel">统计天数</div>
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="label">白班天数</div>
+      <div class="value" id="kpiDayCount">0</div>
+      <div class="sub">150 元/天</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">晚班次数</div>
+      <div class="value" id="kpiNightCount">0</div>
+      <div class="sub">25 元/小时</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">晚班总工时</div>
+      <div class="value" id="kpiHours">0<span style="font-size:14px;font-weight:500;color:var(--text-secondary)"> h</span></div>
+      <div class="sub">晚班累计小时</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">日均收入</div>
+      <div class="value" id="kpiAvg">¥0</div>
+      <div class="sub" id="kpiAvgLabel">--</div>
+    </div>
   </div>
 </div>
 
-<!-- ── Charts ── -->
+<!-- ════ 板块2+3+4: Charts ════ -->
 <div class="charts-grid">
+  <!-- 板块2: 饼图 -->
   <div class="chart-panel">
-    <h3>收入占比</h3>
-    <div class="chart-wrap doughnut">
-      <canvas id="pieChart"></canvas>
+    <div class="chart-header">
+      <h3>🥧 收入占比</h3>
+      <button class="range-pill" onclick="pickRange('pie', this)" id="rangeBtn_pie">
+        <span id="rangeLabel_pie">--</span>
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+      <input type="date" id="dr_pie_start" style="display:none" onchange="onPanelRangeChange('pie')">
+      <input type="date" id="dr_pie_end" style="display:none" onchange="onPanelRangeChange('pie')">
     </div>
+    <div class="chart-wrap doughnut"><canvas id="pieChart"></canvas></div>
   </div>
+
+  <!-- 板块3: 柱状图 -->
   <div class="chart-panel">
-    <h3>每日收入</h3>
-    <div class="chart-wrap">
-      <canvas id="barChart"></canvas>
+    <div class="chart-header">
+      <h3>📊 每日收入</h3>
+      <button class="range-pill" onclick="pickRange('bar', this)" id="rangeBtn_bar">
+        <span id="rangeLabel_bar">--</span>
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+      <input type="date" id="dr_bar_start" style="display:none" onchange="onPanelRangeChange('bar')">
+      <input type="date" id="dr_bar_end" style="display:none" onchange="onPanelRangeChange('bar')">
     </div>
+    <div class="chart-wrap"><canvas id="barChart"></canvas></div>
   </div>
+
+  <!-- 板块4: 折线图 -->
   <div class="chart-panel full">
-    <h3>累计收入趋势</h3>
-    <div class="chart-wrap">
-      <canvas id="lineChart"></canvas>
+    <div class="chart-header">
+      <h3>📈 收入趋势</h3>
+      <div class="chart-header-right">
+        <div class="mode-toggle" id="lineModeToggle">
+          <button id="modeCumulative" class="active" onclick="setLineMode('cumulative')">累计</button>
+          <button id="modeDaily" onclick="setLineMode('daily')">每日</button>
+        </div>
+        <button class="range-pill" onclick="pickRange('line', this)" id="rangeBtn_line">
+          <span id="rangeLabel_line">--</span>
+          <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+        </button>
+        <input type="date" id="dr_line_start" style="display:none" onchange="onPanelRangeChange('line')">
+        <input type="date" id="dr_line_end" style="display:none" onchange="onPanelRangeChange('line')">
+      </div>
     </div>
+    <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
   </div>
 </div>
 
 <!-- ── History ── -->
 <div class="history-panel">
-  <h3>班次记录 <span style="font-weight:400;font-size:12px;color:var(--text-muted)" id="historyCount"></span></h3>
+  <h3>📋 班次记录 <span style="font-weight:400;font-size:11px;color:var(--text-muted)" id="historyCount"></span></h3>
   <div class="history-list" id="historyList">
-    <div class="empty-state"><div class="icon">📋</div><p>暂无记录，点击上方按钮添加班次</p></div>
+    <div class="empty-state"><div class="icon">📋</div><p>暂无记录</p></div>
   </div>
   <div class="pagination" id="pagination" style="display:none">
     <button class="page-btn" id="pagePrev" onclick="changePage(-1)">← 上一页</button>
@@ -247,36 +269,34 @@
   </div>
 </div>
 
-<!-- ── Modal ── -->
-<div class="overlay" id="overlay">
+<!-- ── Shift Modal ── -->
+<div class="overlay" id="shiftOverlay">
   <div class="modal">
     <h2>添加班次</h2>
-    <div class="field">
-      <label>日期</label>
-      <input type="date" id="modalDate">
+    <div class="field"><label>日期</label><input type="date" id="modalDate"></div>
+    <div class="field"><label>班次类型</label>
+      <div class="type-toggle"><button id="btnDay" class="active-day" onclick="setType('day')">☀️ 白班</button><button id="btnNight" onclick="setType('night')">🌙 晚班</button></div>
     </div>
-    <div class="field">
-      <label>班次类型</label>
-      <div class="type-toggle">
-        <button id="btnDay" class="active-day" onclick="setType('day')">☀️ 白班</button>
-        <button id="btnNight" onclick="setType('night')">🌙 晚班</button>
-      </div>
-    </div>
-    <div class="field" id="hoursField" style="display:none">
-      <label>晚班时长（小时）</label>
-      <input type="number" id="modalHours" placeholder="如 4、3.5" min="0.5" max="24" step="0.5">
-    </div>
-    <div class="field" id="previewField" style="display:none">
-      <label>预计收入</label>
-      <div class="earning-preview" id="earningPreview">¥0</div>
-    </div>
-    <div class="field">
-      <label>备注（可选）</label>
-      <input type="text" id="modalNote" placeholder="如：替班、加班">
-    </div>
+    <div class="field" id="hoursField" style="display:none"><label>晚班时长（小时）</label><input type="number" id="modalHours" placeholder="如 4、3.5" min="0.5" max="24" step="0.5"></div>
+    <div class="field" id="previewField" style="display:none"><label>预计收入</label><div class="earning-preview" id="earningPreview">¥0</div></div>
+    <div class="field"><label>备注（可选）</label><input type="text" id="modalNote" placeholder="如：替班、加班"></div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+      <button class="btn btn-ghost" onclick="closeShiftModal()">取消</button>
       <button class="btn btn-primary" onclick="saveShift()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Period Modal ── -->
+<div class="overlay" id="periodOverlay">
+  <div class="modal">
+    <h2>新建工期</h2>
+    <div class="field"><label>名称（可选）</label><input type="text" id="periodName" placeholder="如：暑假工、正式上班"></div>
+    <div class="field"><label>起始日期</label><input type="date" id="periodStart"></div>
+    <div class="field"><label>结束日期</label><input type="date" id="periodEnd"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closePeriodModal()">取消</button>
+      <button class="btn btn-primary" onclick="savePeriod()">保存</button>
     </div>
   </div>
 </div>
@@ -286,106 +306,192 @@
 const STORAGE_KEY = 'ledger-work';
 const SETTINGS_KEY = 'ledger-work-settings';
 const PER_PAGE = 12;
+const PANELS = ['kpi', 'pie', 'bar', 'line'];
 
-// Migrate old data
 if (!localStorage.getItem(STORAGE_KEY) && localStorage.getItem('work-schedule-data')) {
   localStorage.setItem(STORAGE_KEY, localStorage.getItem('work-schedule-data'));
 }
 
 let currentType = 'day';
 let currentPage = 1;
+let pickingPanel = null;
 
-function loadData() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-  catch { return []; }
-}
-function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-function addRecord(record) { const d = loadData(); d.push(record); saveData(d); }
+function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
+function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+function addRecord(r) { const d = loadData(); d.push(r); saveData(d); }
 function deleteRecord(id) { saveData(loadData().filter(r => r.id !== id)); }
 
-// ── Settings (date range) ──
-const DEFAULT_SETTINGS = { dateStart: '2026-07-27', dateEnd: '2026-08-19' };
+// ── Settings ──
+const DEFAULT_SETTINGS = {
+  periods: [{ name: '7/27-8/19', start: '2026-07-27', end: '2026-08-19' }],
+  activePeriod: 0,
+  panelRanges: {
+    kpi: { start: '2026-07-27', end: '2026-08-19' },
+    pie: { start: '2026-07-27', end: '2026-08-19' },
+    bar: { start: '2026-07-27', end: '2026-08-19' },
+    line: { start: '2026-07-27', end: '2026-08-19' },
+  },
+  lineMode: 'cumulative',
+};
 
 function loadSettings() {
-  try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
+  try { const raw = localStorage.getItem(SETTINGS_KEY); if (raw) return JSON.parse(raw); } catch {}
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(DEFAULT_SETTINGS));
-  return DEFAULT_SETTINGS;
+  return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
 }
 function saveSettings(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
 
-// ── Filter by date range ──
+function getPanelRange(settings, panel) {
+  const pr = settings.panelRanges[panel];
+  if (pr && pr.start && pr.end) return { start: pr.start, end: pr.end };
+  // Fallback to active period
+  const ap = settings.periods[settings.activePeriod];
+  if (ap) return { start: ap.start, end: ap.end };
+  return { start: '2026-07-27', end: '2026-08-19' };
+}
+
 function filterByRange(data, start, end) {
   return data.filter(r => r.date >= start && r.date <= end);
 }
 
-// ── Compute stats ──
-function getStats(data, start, end) {
-  const rangeData = filterByRange(data, start, end);
-  const dayShifts = rangeData.filter(r => r.type === 'day');
-  const nightShifts = rangeData.filter(r => r.type === 'night');
-
-  const totalEarnings = rangeData.reduce((s, r) => s + r.earnings, 0);
-  const dayCount = dayShifts.length;
-  const nightCount = nightShifts.length;
-  const totalNightHours = nightShifts.reduce((s, r) => s + (r.hours || 0), 0);
-
-  const workDays = new Set(rangeData.map(r => r.date)).size;
-  const avgDaily = workDays > 0 ? Math.round(totalEarnings / workDays) : 0;
-
-  // Total days in range
-  const d1 = new Date(start), d2 = new Date(end);
-  const totalDays = Math.floor((d2 - d1) / 86400000) + 1;
-
-  return { totalEarnings, dayCount, nightCount, totalNightHours, avgDaily, workDays, totalDays, start, end, rangeData };
-}
-
-// ── Render ──
+// ── Render all ──
 let pieChart, barChart, lineChart;
 
 function renderAll() {
   const settings = loadSettings();
-  document.getElementById('drStart').value = settings.dateStart;
-  document.getElementById('drEnd').value = settings.dateEnd;
-
   const data = loadData();
-  const stats = getStats(data, settings.dateStart, settings.dateEnd);
 
-  // Hero
-  document.getElementById('heroTotal').textContent = stats.totalEarnings.toLocaleString();
-  document.getElementById('heroLabel').textContent = `${stats.start} → ${stats.end}`;
-  document.getElementById('drSummary').textContent = `共 ${stats.totalDays} 天 · ${stats.workDays} 天有班`;
+  // Period pills
+  renderPeriods(settings);
 
-  // KPI
-  document.getElementById('kpiDayCount').textContent = stats.dayCount;
-  document.getElementById('kpiNightCount').textContent = stats.nightCount;
-  document.getElementById('kpiHours').innerHTML = stats.totalNightHours + '<span style="font-size:16px;font-weight:500;color:var(--text-secondary)"> h</span>';
-  document.getElementById('kpiAvg').textContent = '¥' + stats.avgDaily.toLocaleString();
-  document.getElementById('kpiAvgLabel').textContent = stats.workDays + ' 个工作日';
-
-  // Charts
-  renderPieChart(data, stats);
-  renderBarChart(data, settings.dateStart, settings.dateEnd);
-  renderLineChart(data, settings.dateStart, settings.dateEnd);
-  renderHistory(data, settings.dateStart, settings.dateEnd);
+  // Each panel
+  renderKPI(data, settings);
+  renderPieChart(data, settings);
+  renderBarChart(data, settings);
+  renderLineChart(data, settings);
+  renderHistory(data);
 }
 
-function destroyChart(key) {
-  if (key === 'pie' && pieChart) { pieChart.destroy(); pieChart = null; }
-  if (key === 'bar' && barChart) { barChart.destroy(); barChart = null; }
-  if (key === 'line' && lineChart) { lineChart.destroy(); lineChart = null; }
+// ── Periods ──
+function renderPeriods(settings) {
+  const el = document.getElementById('periodPills');
+  el.innerHTML = settings.periods.map((p, i) => {
+    const active = i === settings.activePeriod ? ' active' : '';
+    const name = p.name || (p.start + ' → ' + p.end);
+    return `<button class="period-pill${active}" onclick="selectPeriod(${i})">
+      ${name}<span class="del" onclick="event.stopPropagation();deletePeriod(${i})">×</span>
+    </button>`;
+  }).join('');
 }
 
-function renderPieChart(data, stats) {
-  destroyChart('pie');
+function selectPeriod(idx) {
+  const s = loadSettings();
+  s.activePeriod = idx;
+  const p = s.periods[idx];
+  if (p) {
+    // Update all panel ranges to match
+    PANELS.forEach(k => { s.panelRanges[k] = { start: p.start, end: p.end }; });
+  }
+  saveSettings(s);
+  renderAll();
+}
+
+function deletePeriod(idx) {
+  const s = loadSettings();
+  if (s.periods.length <= 1) return alert('至少保留一个工期');
+  s.periods.splice(idx, 1);
+  if (s.activePeriod >= s.periods.length) s.activePeriod = s.periods.length - 1;
+  saveSettings(s);
+  renderAll();
+}
+
+function openPeriodModal() {
+  document.getElementById('periodOverlay').classList.add('active');
+  document.getElementById('periodName').value = '';
+  document.getElementById('periodStart').value = '2026-07-27';
+  document.getElementById('periodEnd').value = '2026-08-19';
+}
+function closePeriodModal() { document.getElementById('periodOverlay').classList.remove('active'); }
+
+function savePeriod() {
+  const name = document.getElementById('periodName').value.trim();
+  const start = document.getElementById('periodStart').value;
+  const end = document.getElementById('periodEnd').value;
+  if (!start || !end) return alert('请选择起止日期');
+  if (start > end) return alert('起始日期不能晚于结束日期');
+
+  const s = loadSettings();
+  const autoName = name || (start + ' → ' + end);
+  s.periods.push({ name: autoName, start, end });
+  s.activePeriod = s.periods.length - 1;
+  PANELS.forEach(k => { s.panelRanges[k] = { start, end }; });
+  saveSettings(s);
+  closePeriodModal();
+  renderAll();
+}
+
+// ── Panel range picker ──
+function pickRange(panel, btn) {
+  const s = loadSettings();
+  const range = getPanelRange(s, panel);
+  const startInput = document.getElementById('dr_' + panel + '_start');
+  const endInput = document.getElementById('dr_' + panel + '_end');
+  startInput.value = range.start;
+  endInput.value = range.end;
+  startInput.showPicker ? startInput.showPicker() : startInput.click();
+}
+
+function onPanelRangeChange(panel) {
+  const start = document.getElementById('dr_' + panel + '_start').value;
+  const end = document.getElementById('dr_' + panel + '_end').value;
+  if (!start || !end) return;
+  const s = loadSettings();
+  s.panelRanges[panel] = { start, end };
+  saveSettings(s);
+  renderAll();
+}
+
+function updateRangeLabel(panel, start, end) {
+  const el = document.getElementById('rangeLabel_' + panel);
+  if (el) el.textContent = start.split('-').slice(1).join('/') + ' → ' + end.split('-').slice(1).join('/');
+}
+
+// ── KPI ──
+function renderKPI(data, settings) {
+  const range = getPanelRange(settings, 'kpi');
+  updateRangeLabel('kpi', range.start, range.end);
+
+  const rd = filterByRange(data, range.start, range.end);
+  const dayShifts = rd.filter(r => r.type === 'day');
+  const nightShifts = rd.filter(r => r.type === 'night');
+  const total = rd.reduce((s, r) => s + r.earnings, 0);
+  const dayCount = dayShifts.length;
+  const nightCount = nightShifts.length;
+  const nightHours = nightShifts.reduce((s, r) => s + (r.hours || 0), 0);
+  const workDays = new Set(rd.map(r => r.date)).size;
+  const avgDaily = workDays > 0 ? Math.round(total / workDays) : 0;
+
+  document.getElementById('heroTotal').textContent = total.toLocaleString();
+  document.getElementById('kpiDayCount').textContent = dayCount;
+  document.getElementById('kpiNightCount').textContent = nightCount;
+  document.getElementById('kpiHours').innerHTML = nightHours + '<span style="font-size:14px;font-weight:500;color:var(--text-secondary)"> h</span>';
+  document.getElementById('kpiAvg').textContent = '¥' + avgDaily.toLocaleString();
+  document.getElementById('kpiAvgLabel').textContent = workDays + ' 个工作日';
+}
+
+// ── Pie ──
+function renderPieChart(data, settings) {
+  if (pieChart) { pieChart.destroy(); pieChart = null; }
+  const range = getPanelRange(settings, 'pie');
+  updateRangeLabel('pie', range.start, range.end);
+
+  const rd = filterByRange(data, range.start, range.end);
+  const dayEarnings = rd.filter(r => r.type === 'day').length * 150;
+  const nightEarnings = rd.filter(r => r.type === 'night').reduce((s, r) => s + r.earnings, 0);
+  const total = dayEarnings + nightEarnings;
+
   const ctx = document.getElementById('pieChart').getContext('2d');
-
-  const dayEarnings = stats.dayCount * 150;
-  const nightEarnings = stats.rangeData.filter(r => r.type === 'night').reduce((s, r) => s + r.earnings, 0);
-
-  if (dayEarnings === 0 && nightEarnings === 0) {
+  if (total === 0) {
     pieChart = new Chart(ctx, {
       type: 'doughnut',
       data: { labels: ['暂无数据'], datasets: [{ data: [1], backgroundColor: ['#2c2c2a'], borderColor: '#1a1a19', borderWidth: 2 }] },
@@ -401,40 +507,40 @@ function renderPieChart(data, stats) {
       datasets: [{ data: [dayEarnings, nightEarnings], backgroundColor: ['#3987e5', '#d95926'], borderColor: '#1a1a19', borderWidth: 2 }],
     },
     options: {
-      responsive: true, maintainAspectRatio: true, cutout: '58%',
+      responsive: true, maintainAspectRatio: true, cutout: '55%',
       plugins: {
-        legend: { position: 'bottom', labels: { color: '#c3c2b7', padding: 20, font: { family: 'system-ui, sans-serif', size: 13 }, usePointStyle: true, pointStyleWidth: 10 } },
+        legend: { position: 'bottom', labels: { color: '#c3c2b7', padding: 16, font: { size: 12 }, usePointStyle: true, pointStyleWidth: 8 } },
         tooltip: {
-          backgroundColor: '#222221', titleColor: '#ffffff', bodyColor: '#c3c2b7', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 8, padding: 10,
-          callbacks: { label: ctx => ` ${ctx.label}: ¥${ctx.raw.toLocaleString()}（${((ctx.raw / (dayEarnings + nightEarnings)) * 100).toFixed(1)}%）` },
+          backgroundColor: '#222221', titleColor: '#fff', bodyColor: '#c3c2b7', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 6, padding: 8,
+          callbacks: { label: ctx => ` ${ctx.label}: ¥${ctx.raw.toLocaleString()} (${((ctx.raw/total)*100).toFixed(1)}%)` },
         },
       },
     },
   });
 }
 
-function renderBarChart(data, dateStart, dateEnd) {
-  destroyChart('bar');
-  const ctx = document.getElementById('barChart').getContext('2d');
+// ── Bar ──
+function renderBarChart(data, settings) {
+  if (barChart) { barChart.destroy(); barChart = null; }
+  const range = getPanelRange(settings, 'bar');
+  updateRangeLabel('bar', range.start, range.end);
 
   // Build date list from range
   const days = [];
-  const d = new Date(dateStart + 'T00:00:00');
-  const end = new Date(dateEnd + 'T00:00:00');
-  while (d <= end) {
-    days.push(d.toISOString().split('T')[0]);
-    d.setDate(d.getDate() + 1);
-  }
+  const d = new Date(range.start + 'T00:00:00');
+  const end = new Date(range.end + 'T00:00:00');
+  while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); }
 
   const earningsByDay = {};
   data.forEach(r => { if (days.includes(r.date)) earningsByDay[r.date] = (earningsByDay[r.date] || 0) + r.earnings; });
-
   const values = days.map(d => earningsByDay[d] || 0);
   const labels = days.map(d => { const p = d.split('-'); return p[1] + '/' + p[2]; });
 
-  // Show fewer labels if range > 30 days
-  const labelStep = days.length > 30 ? Math.ceil(days.length / 25) : 1;
+  // Dynamic bar thickness: more days → thinner bars
+  const dayCount = days.length;
+  const maxThickness = Math.max(6, Math.min(24, Math.floor(400 / dayCount)));
 
+  const ctx = document.getElementById('barChart').getContext('2d');
   barChart = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -442,9 +548,11 @@ function renderBarChart(data, dateStart, dateEnd) {
       datasets: [{
         data: values,
         backgroundColor: values.map(v => v > 0 ? '#3987e5' : '#2c2c2a'),
-        borderRadius: 4,
+        borderRadius: maxThickness > 8 ? 3 : 2,
         borderSkipped: false,
-        maxBarThickness: 24,
+        maxBarThickness: maxThickness,
+        barPercentage: dayCount <= 7 ? 0.6 : dayCount <= 14 ? 0.8 : 0.95,
+        categoryPercentage: dayCount <= 7 ? 0.6 : dayCount <= 14 ? 0.8 : 0.95,
       }],
     },
     options: {
@@ -452,55 +560,75 @@ function renderBarChart(data, dateStart, dateEnd) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#222221', titleColor: '#ffffff', bodyColor: '#c3c2b7', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 8, padding: 10,
-          callbacks: { title: items => days[items[0].dataIndex], label: ctx => ctx.raw > 0 ? ` ¥${ctx.raw.toLocaleString()}` : ' 无班次' },
+          backgroundColor: '#222221', titleColor: '#fff', bodyColor: '#c3c2b7', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 6, padding: 8,
+          callbacks: { title: items => days[items[0].dataIndex], label: ctx => ctx.raw > 0 ? ` ¥${ctx.raw.toLocaleString()}` : ' 休息' },
         },
       },
       scales: {
-        x: {
-          grid: { display: false },
-          ticks: { color: '#898781', font: { size: 10 }, maxTicksLimit: 25, autoSkip: true },
-          border: { color: '#383835' },
-        },
+        x: { grid: { display: false }, ticks: { color: '#898781', font: { size: 10 }, maxTicksLimit: 25, autoSkip: true }, border: { color: '#383835' } },
         y: { grid: { color: '#2c2c2a' }, ticks: { color: '#898781', font: { size: 11 }, callback: v => '¥' + v }, border: { color: '#383835' }, beginAtZero: true },
       },
     },
   });
 }
 
-function renderLineChart(data, dateStart, dateEnd) {
-  destroyChart('line');
+// ── Line ──
+function setLineMode(mode) {
+  const s = loadSettings();
+  s.lineMode = mode;
+  saveSettings(s);
+  renderAll();
+}
+
+function renderLineChart(data, settings) {
+  if (lineChart) { lineChart.destroy(); lineChart = null; }
+  const range = getPanelRange(settings, 'line');
+  const mode = settings.lineMode || 'cumulative';
+  updateRangeLabel('line', range.start, range.end);
+
+  // Toggle buttons
+  document.getElementById('modeCumulative').className = mode === 'cumulative' ? 'active' : '';
+  document.getElementById('modeDaily').className = mode === 'daily' ? 'active' : '';
+
+  const rd = filterByRange(data, range.start, range.end).sort((a, b) => a.date.localeCompare(b.date));
   const ctx = document.getElementById('lineChart').getContext('2d');
 
-  const rangeData = filterByRange(data, dateStart, dateEnd).sort((a, b) => a.date.localeCompare(b.date));
-
-  if (rangeData.length === 0) {
+  if (rd.length === 0) {
     lineChart = new Chart(ctx, {
       type: 'line',
-      data: { labels: [dateStart, dateEnd], datasets: [{ data: [0, 0], borderColor: '#2c2c2a', borderWidth: 2, pointRadius: 0, tension: 0.3 }] },
+      data: { labels: [range.start, range.end], datasets: [{ data: [0, 0], borderColor: '#2c2c2a', borderWidth: 2, pointRadius: 0 }] },
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } },
     });
     return;
   }
 
-  const labels = [], cumulative = [];
-  let running = 0;
   const byDate = {};
-  rangeData.forEach(r => { byDate[r.date] = (byDate[r.date] || 0) + r.earnings; });
-  Object.keys(byDate).sort().forEach(date => {
-    running += byDate[date];
-    labels.push(date.split('-').slice(1).join('/'));
-    cumulative.push(running);
-  });
+  rd.forEach(r => { byDate[r.date] = (byDate[r.date] || 0) + r.earnings; });
+  const sortedDates = Object.keys(byDate).sort();
+
+  let labels, values, color, bgColor;
+  if (mode === 'cumulative') {
+    labels = []; values = []; let running = 0;
+    sortedDates.forEach(date => {
+      running += byDate[date];
+      labels.push(date.split('-').slice(1).join('/'));
+      values.push(running);
+    });
+    color = '#d95926'; bgColor = 'rgba(217,89,38,0.08)';
+  } else {
+    labels = sortedDates.map(d => d.split('-').slice(1).join('/'));
+    values = sortedDates.map(d => byDate[d]);
+    color = '#3987e5'; bgColor = 'rgba(57,135,229,0.08)';
+  }
 
   lineChart = new Chart(ctx, {
     type: 'line',
     data: {
       labels,
       datasets: [{
-        label: '累计收入', data: cumulative,
-        borderColor: '#d95926', backgroundColor: 'rgba(217,89,38,0.08)',
-        borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#d95926', pointBorderColor: '#1a1a19', pointBorderWidth: 2, pointHoverRadius: 8,
+        data: values, borderColor: color, backgroundColor: bgColor,
+        borderWidth: 2, pointRadius: values.length > 30 ? 0 : 3,
+        pointBackgroundColor: color, pointBorderColor: '#1a1a19', pointBorderWidth: 2, pointHoverRadius: 6,
         fill: true, tension: 0.3,
       }],
     },
@@ -510,24 +638,22 @@ function renderLineChart(data, dateStart, dateEnd) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#222221', titleColor: '#ffffff', bodyColor: '#d95926', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 8, padding: 10, displayColors: false,
-          callbacks: { label: ctx => `累计 ¥${ctx.raw.toLocaleString()}` },
+          backgroundColor: '#222221', titleColor: '#fff', bodyColor: color, borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 6, padding: 8, displayColors: false,
+          callbacks: { label: ctx => (mode === 'cumulative' ? '累计 ' : '') + '¥' + ctx.raw.toLocaleString() },
         },
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: '#898781', font: { size: 11 }, maxTicksLimit: 15 }, border: { color: '#383835' } },
+        x: { grid: { display: false }, ticks: { color: '#898781', font: { size: 10 }, maxTicksLimit: 15 }, border: { color: '#383835' } },
         y: { grid: { color: '#2c2c2a' }, ticks: { color: '#898781', font: { size: 11 }, callback: v => '¥' + v.toLocaleString() }, border: { color: '#383835' }, beginAtZero: true },
       },
     },
   });
 }
 
-// ── History with pagination ──
-function renderHistory(data, dateStart, dateEnd) {
+// ── History ──
+function renderHistory(data) {
   const sorted = [...data].sort((a, b) => b.date.localeCompare(a.date));
   const totalPages = Math.ceil(sorted.length / PER_PAGE) || 1;
-
-  // Clamp current page
   if (currentPage > totalPages) currentPage = totalPages;
   if (currentPage < 1) currentPage = 1;
 
@@ -535,90 +661,68 @@ function renderHistory(data, dateStart, dateEnd) {
   const el = document.getElementById('historyList');
 
   if (sorted.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>暂无记录，点击上方按钮添加班次</p></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>暂无记录</p></div>`;
     document.getElementById('pagination').style.display = 'none';
     return;
   }
 
   const start = (currentPage - 1) * PER_PAGE;
   const pageItems = sorted.slice(start, start + PER_PAGE);
+  const today = new Date().toISOString().split('T')[0];
 
   el.innerHTML = pageItems.map(r => {
-    const badgeClass = r.type === 'day' ? 'day' : 'night';
-    const badgeText = r.type === 'day' ? '☀️ 白班' : '🌙 晚班';
-    let detailText = r.type === 'day' ? '8:20 — 18:00 · 150 元' : `${r.hours} 小时 · ¥${r.earnings}`;
-    if (r.note) detailText += ` · ${r.note}`;
-    const dateDisplay = r.date.split('-').slice(1).join('/');
-
+    const bc = r.type === 'day' ? 'day' : 'night';
+    const bt = r.type === 'day' ? '☀️ 白班' : '🌙 晚班';
+    let detail = r.type === 'day' ? '8:20–18:00 · ¥150' : `${r.hours}h · ¥${r.earnings}`;
+    if (r.note) detail += ` · ${r.note}`;
     return `<div class="history-item">
-      <span class="history-date">${dateDisplay}</span>
-      <span class="shift-badge ${badgeClass}">${badgeText}</span>
-      <span class="history-detail">${detailText}</span>
+      <span class="history-date">${r.date.split('-').slice(1).join('/')}${r.date === today ? ' <span style="color:var(--series-2);font-size:10px">今天</span>' : ''}</span>
+      <span class="shift-badge ${bc}">${bt}</span>
+      <span class="history-detail">${detail}</span>
       <span class="history-earnings">¥${r.earnings}</span>
-      <span class="history-del" title="删除" onclick="event.stopPropagation(); removeShift('${r.id}')">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="4" x2="14" y2="4"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5"/><line x1="3" y1="4" x2="13" y2="4" stroke="#d03b3b"/></svg>
+      <span class="history-del" title="删除" onclick="event.stopPropagation();removeShift('${r.id}')">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="4" x2="14" y2="4"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5"/></svg>
       </span>
     </div>`;
   }).join('');
 
-  // Pagination UI
   const pagEl = document.getElementById('pagination');
   if (totalPages > 1) {
     pagEl.style.display = 'flex';
     document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
     document.getElementById('pagePrev').disabled = currentPage <= 1;
     document.getElementById('pageNext').disabled = currentPage >= totalPages;
-  } else {
-    pagEl.style.display = 'none';
-  }
+  } else { pagEl.style.display = 'none'; }
 }
 
-function changePage(delta) {
-  currentPage += delta;
-  renderAll();
-}
+function changePage(d) { currentPage += d; renderAll(); }
 
-// ── Date range change ──
-function onDateRangeChange() {
-  const s = document.getElementById('drStart').value;
-  const e = document.getElementById('drEnd').value;
-  if (!s || !e) return;
-  saveSettings({ dateStart: s, dateEnd: e });
-  currentPage = 1;
-  renderAll();
-}
-
-// ── Modal ──
-function openModal() {
-  document.getElementById('overlay').classList.add('active');
+// ── Shift modal ──
+function openShiftModal() {
+  document.getElementById('shiftOverlay').classList.add('active');
   document.getElementById('modalDate').value = new Date().toISOString().split('T')[0];
   setType('day');
   document.getElementById('modalHours').value = '';
   document.getElementById('modalNote').value = '';
 }
-function closeModal() { document.getElementById('overlay').classList.remove('active'); }
+function closeShiftModal() { document.getElementById('shiftOverlay').classList.remove('active'); }
 
-function setType(type) {
-  currentType = type;
-  const hoursField = document.getElementById('hoursField');
-  const previewField = document.getElementById('previewField');
-  if (type === 'day') {
+function setType(t) {
+  currentType = t;
+  const hf = document.getElementById('hoursField'), pf = document.getElementById('previewField');
+  if (t === 'day') {
     document.getElementById('btnDay').className = 'active-day';
     document.getElementById('btnNight').className = '';
-    hoursField.style.display = 'none';
-    previewField.style.display = 'none';
+    hf.style.display = 'none'; pf.style.display = 'none';
     document.getElementById('modalHours').value = '';
   } else {
     document.getElementById('btnDay').className = '';
     document.getElementById('btnNight').className = 'active-night';
-    hoursField.style.display = 'block';
-    previewField.style.display = 'block';
+    hf.style.display = 'block'; pf.style.display = 'block';
     updatePreview();
   }
 }
-function updatePreview() {
-  document.getElementById('earningPreview').textContent = '¥' + ((parseFloat(document.getElementById('modalHours').value) || 0) * 25);
-}
+function updatePreview() { document.getElementById('earningPreview').textContent = '¥' + ((parseFloat(document.getElementById('modalHours').value) || 0) * 25); }
 document.getElementById('modalHours').addEventListener('input', updatePreview);
 
 function saveShift() {
@@ -631,27 +735,18 @@ function saveShift() {
     if (!hours || hours <= 0) return alert('请输入晚班时长');
     earnings = Math.round(hours * 25);
   }
-  addRecord({
-    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    date, type: currentType,
-    hours: currentType === 'night' ? hours : 0,
-    earnings,
-    note: document.getElementById('modalNote').value.trim() || '',
-  });
-  closeModal();
+  addRecord({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date, type: currentType, hours: currentType === 'night' ? hours : 0, earnings, note: document.getElementById('modalNote').value.trim() || '' });
+  closeShiftModal();
   currentPage = 1;
   renderAll();
 }
 
-function removeShift(id) {
-  if (!confirm('确定删除这条记录吗？')) return;
-  deleteRecord(id);
-  renderAll();
-}
+function removeShift(id) { if (!confirm('确定删除？')) return; deleteRecord(id); renderAll(); }
 
 // ── Keyboard ──
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-document.getElementById('overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeShiftModal(); closePeriodModal(); } });
+document.getElementById('shiftOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeShiftModal(); });
+document.getElementById('periodOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closePeriodModal(); });
 
 // ── Init ──
 renderAll();
