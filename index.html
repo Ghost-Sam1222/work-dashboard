@@ -146,12 +146,22 @@
     color: var(--text-muted);
   }
 
+  .ledger-edit {
+    color: var(--text-muted);
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity .15s;
+    padding: 4px;
+    border-radius: 6px;
+  }
+  .ledger-edit:hover { opacity: 1 !important; color: var(--text-primary); background: rgba(255,255,255,0.06); }
   .ledger-arrow {
     color: var(--text-muted);
     flex-shrink: 0;
     opacity: 0;
     transition: opacity .15s;
   }
+  .ledger-card:hover .ledger-edit { opacity: .4; }
   .ledger-card:hover .ledger-arrow { opacity: .6; }
 
   /* ── Add card ── */
@@ -362,6 +372,21 @@
   </div>
 </div>
 
+<!-- ── Edit modal ── -->
+<div class="overlay" id="editOverlay">
+  <div class="modal">
+    <h2>编辑子账本</h2>
+    <input type="hidden" id="editId">
+    <div class="field"><label>名称</label><input type="text" id="editName" placeholder="如：班次收入、出行报销"></div>
+    <div class="field"><label>图标</label><input type="text" id="editIcon" placeholder="如：☀️、✈️、🍜" maxlength="2"></div>
+    <div class="field"><label>描述（可选）</label><input type="text" id="editDesc" placeholder="简要说明这个账本记什么"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeEditModal()">取消</button>
+      <button class="btn btn-primary" onclick="updateLedger()">保存</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── Ledger registry ──
 const META_KEY = 'ledger-meta';
@@ -455,6 +480,9 @@ function renderAll() {
           <div class="amount">¥${stats.total.toLocaleString()}</div>
           <div class="period">统计区间</div>
         </div>
+        <span class="ledger-edit" title="编辑" onclick="event.preventDefault();event.stopPropagation();openEditModal('${l.id}')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v3h3l8-8-3-3zM11 2l3 3"/></svg>
+        </span>
         <span class="ledger-arrow">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
         </span>
@@ -533,12 +561,52 @@ function createLedger() {
   renderAll();
 }
 
+// ── Edit ledger ──
+function openEditModal(id) {
+  const meta = loadMeta();
+  const l = meta.find(l => l.id === id);
+  if (!l) return;
+  document.getElementById('editId').value = l.id;
+  document.getElementById('editName').value = l.name;
+  document.getElementById('editIcon').value = l.icon || '';
+  document.getElementById('editDesc').value = l.description || '';
+  document.getElementById('editOverlay').classList.add('active');
+  document.getElementById('editName').focus();
+}
+
+function closeEditModal() {
+  document.getElementById('editOverlay').classList.remove('active');
+}
+
+function updateLedger() {
+  const id = document.getElementById('editId').value;
+  const name = document.getElementById('editName').value.trim();
+  const icon = document.getElementById('editIcon').value.trim() || '📒';
+  const description = document.getElementById('editDesc').value.trim();
+
+  if (!name) return alert('请输入名称');
+
+  const meta = loadMeta();
+  const idx = meta.findIndex(l => l.id === id);
+  if (idx === -1) return;
+
+  meta[idx].name = name;
+  meta[idx].icon = icon;
+  meta[idx].description = description;
+  saveMeta(meta);
+  closeEditModal();
+  renderAll();
+}
+
 // ── Keyboard ──
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeCreateModal();
+  if (e.key === 'Escape') { closeCreateModal(); closeEditModal(); }
 });
 document.getElementById('overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeCreateModal();
+});
+document.getElementById('editOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeEditModal();
 });
 
 // ── Init ──
