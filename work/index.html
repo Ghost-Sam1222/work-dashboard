@@ -347,6 +347,15 @@ function saveData(d) {
 function addRecord(r) { const d = loadData(); d.push(r); saveData(d); }
 function deleteRecord(id) { saveData(loadData().filter(r => r.id !== id)); }
 
+// ── Constants ──
+const DEFAULT_RANGE = { start: '2026-07-27', end: '2026-08-19' };
+const TOOLTIP_STYLE = { backgroundColor: '#222221', titleColor: '#fff', bodyColor: '#c3c2b7', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 6, padding: 8 };
+const fmtMD = d => d.split('-').slice(1).join('/');
+const nowISO = () => new Date().toISOString().split('T')[0];
+const charts = {};
+function destroyChart(key) { if (charts[key]) { charts[key].destroy(); charts[key] = null; } }
+function setChart(key, c) { destroyChart(key); charts[key] = c; }
+
 // ── Settings ──
 const DEFAULT_SETTINGS = {
   periods: [{ name: '7/27-8/19', start: DEFAULT_RANGE.start, end: DEFAULT_RANGE.end }],
@@ -387,16 +396,6 @@ function getPanelRange(settings, panel) {
 function filterByRange(data, start, end) {
   return data.filter(r => r.date >= start && r.date <= end);
 }
-
-// ── Shared helpers ──
-const DEFAULT_RANGE = { start: '2026-07-27', end: '2026-08-19' };
-const TOOLTIP_STYLE = { backgroundColor: '#222221', titleColor: '#fff', bodyColor: '#c3c2b7', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 6, padding: 8 };
-const fmtMD = d => d.split('-').slice(1).join('/');
-const nowISO = () => new Date().toISOString().split('T')[0];
-
-const charts = {};
-function destroyChart(key) { if (charts[key]) { charts[key].destroy(); charts[key] = null; } }
-function setChart(key, c) { destroyChart(key); charts[key] = c; }
 
 // ── Render all ──
 
