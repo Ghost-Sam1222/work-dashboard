@@ -263,17 +263,33 @@
 <!-- ── Shift Modal ── -->
 <div class="overlay" id="shiftOverlay">
   <div class="modal">
-    <h2>添加班次</h2>
+    <h2 id="shiftModalTitle">添加班次</h2>
+    <input type="hidden" id="modalEditId" value="">
     <div class="field"><label>日期</label><input type="date" id="modalDate"></div>
     <div class="field"><label>班次类型</label>
       <div class="type-toggle"><button id="btnDay" class="active-day" onclick="setType('day')">☀️ 白班</button><button id="btnNight" onclick="setType('night')">🌙 晚班</button></div>
     </div>
-    <div class="field" id="hoursField" style="display:none"><label>晚班时长（小时）</label><input type="number" id="modalHours" placeholder="如 4、3.5" min="0.5" max="24" step="0.5"></div>
+    <div class="field" id="clockFields" style="display:none"><label>打卡时间（可选）</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="time" id="modalClockIn" onchange="onClockChange()" style="flex:1">
+        <span style="color:var(--text-muted)">→</span>
+        <input type="time" id="modalClockOut" onchange="onClockChange()" style="flex:1">
+      </div>
+    </div>
+    <div class="field" id="hoursField" style="display:none"><label>晚班时长（小时）<span style="font-weight:400;font-size:10px;color:var(--text-muted)"> 不足1h按1h算</span></label><input type="number" id="modalHours" placeholder="如 4、3.5" min="0.5" max="24" step="0.5" onchange="updatePreview()"></div>
     <div class="field" id="previewField" style="display:none"><label>预计收入</label><div class="earning-preview" id="earningPreview">¥0</div></div>
     <div class="field"><label>备注（可选）</label><input type="text" id="modalNote" placeholder="如：替班、加班"></div>
+    <div class="field"><label>打卡截图（可选）</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn btn-sm btn-ghost" onclick="uploadShiftImage()">📁 选择图片</button>
+        <span style="font-size:10px;color:var(--text-muted)">选填</span>
+      </div>
+      <img id="modalImagePreview" style="display:none;max-width:100%;max-height:120px;margin-top:6px;border-radius:6px">
+      <input type="hidden" id="modalImage" value="">
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeShiftModal()">取消</button>
-      <button class="btn btn-primary" onclick="saveShift()">保存</button>
+      <button class="btn btn-primary" id="shiftSaveBtn" onclick="saveShift()">保存</button>
     </div>
   </div>
 </div>
@@ -710,13 +726,17 @@ function renderHistory(data) {
   el.innerHTML = pageItems.map(r => {
     const bc = r.type === 'day' ? 'day' : 'night';
     const bt = r.type === 'day' ? '☀️ 白班' : '🌙 晚班';
-    let detail = r.type === 'day' ? '8:20–18:00 · ¥150' : `${r.hours}h · ¥${r.earnings}`;
+    let detail = r.type === 'day' ? '¥150' : `${r.hours}h · ¥${r.earnings}`;
+    if (r.clockIn && r.clockOut) detail = `🕐${r.clockIn}–${r.clockOut} · ` + detail;
     if (r.note) detail += ` · ${r.note}`;
     return `<div class="history-item">
       <span class="history-date">${fmtMD(r.date)}${r.date === today ? ' <span style="color:var(--series-2);font-size:10px">今天</span>' : ''}</span>
       <span class="shift-badge ${bc}">${bt}</span>
-      <span class="history-detail">${detail}</span>
+      <span class="history-detail">${detail}${r.image ? ' 📷' : ''}</span>
       <span class="history-earnings">¥${r.earnings}</span>
+      <span class="history-del" title="编辑" onclick="event.stopPropagation();openEditShiftModal('${r.id}')" style="margin-right:2px">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v3h3l8-8-3-3zM11 2l3 3"/></svg>
+      </span>
       <span class="history-del" title="删除" onclick="event.stopPropagation();removeShift('${r.id}')">
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="4" x2="14" y2="4"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5"/></svg>
       </span>
@@ -736,43 +756,141 @@ function changePage(d) { currentPage += d; renderAll(); }
 
 // ── Shift modal ──
 function openShiftModal() {
+  document.getElementById('shiftModalTitle').textContent = '添加班次';
+  document.getElementById('shiftSaveBtn').textContent = '保存';
+  document.getElementById('modalEditId').value = '';
   document.getElementById('shiftOverlay').classList.add('active');
-  document.getElementById('modalDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('modalDate').value = nowISO();
+  document.getElementById('modalClockIn').value = '';
+  document.getElementById('modalClockOut').value = '';
+  document.getElementById('modalImage').value = '';
+  document.getElementById('modalImagePreview').style.display = 'none';
   setType('day');
   document.getElementById('modalHours').value = '';
   document.getElementById('modalNote').value = '';
+}
+
+function openEditShiftModal(id) {
+  const data = loadData();
+  const r = data.find(r => r.id === id);
+  if (!r) return;
+  document.getElementById('shiftModalTitle').textContent = '编辑班次';
+  document.getElementById('shiftSaveBtn').textContent = '更新';
+  document.getElementById('modalEditId').value = id;
+  document.getElementById('shiftOverlay').classList.add('active');
+  document.getElementById('modalDate').value = r.date;
+  document.getElementById('modalClockIn').value = r.clockIn || '';
+  document.getElementById('modalClockOut').value = r.clockOut || '';
+  document.getElementById('modalImage').value = r.image || '';
+  const imgPreview = document.getElementById('modalImagePreview');
+  if (r.image) { imgPreview.src = r.image; imgPreview.style.display = 'block'; }
+  else { imgPreview.style.display = 'none'; }
+  setType(r.type);
+  document.getElementById('modalHours').value = r.hours || '';
+  document.getElementById('modalNote').value = r.note || '';
+  updatePreview();
 }
 function closeShiftModal() { document.getElementById('shiftOverlay').classList.remove('active'); }
 
 function setType(t) {
   currentType = t;
   const hf = document.getElementById('hoursField'), pf = document.getElementById('previewField');
+  const cf = document.getElementById('clockFields');
   if (t === 'day') {
     document.getElementById('btnDay').className = 'active-day';
     document.getElementById('btnNight').className = '';
     hf.style.display = 'none'; pf.style.display = 'none';
     document.getElementById('modalHours').value = '';
+    cf.style.display = 'none';
   } else {
     document.getElementById('btnDay').className = '';
     document.getElementById('btnNight').className = 'active-night';
     hf.style.display = 'block'; pf.style.display = 'block';
+    cf.style.display = 'block';
     updatePreview();
   }
 }
-function updatePreview() { document.getElementById('earningPreview').textContent = '¥' + ((parseFloat(document.getElementById('modalHours').value) || 0) * 25); }
-document.getElementById('modalHours').addEventListener('input', updatePreview);
+
+function onClockChange() {
+  const inp = document.getElementById('modalClockIn').value;
+  const outp = document.getElementById('modalClockOut').value;
+  if (inp && outp && currentType === 'night') {
+    const [ih, im] = inp.split(':').map(Number), [oh, om] = outp.split(':').map(Number);
+    let diff = (oh * 60 + om - ih * 60 - im) / 60;
+    if (diff <= 0) diff += 24; // cross-midnight
+    document.getElementById('modalHours').value = diff.toFixed(1);
+  }
+  updatePreview();
+}
+
+function updatePreview() {
+  const hrs = parseFloat(document.getElementById('modalHours').value) || 0;
+  if (currentType === 'night' && hrs > 0) {
+    const rounded = Math.ceil(hrs);
+    document.getElementById('earningPreview').textContent = '¥' + (rounded * 25) + (rounded !== hrs ? ' (向上取整: ' + rounded + 'h × ¥25)' : '');
+  } else {
+    document.getElementById('earningPreview').textContent = '¥150';
+  }
+}
+
+function uploadShiftImage() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = () => { if (inp.files[0]) handleShiftImage(inp.files[0]); };
+  inp.click();
+}
+
+function handleShiftImage(file) {
+  if (file.size > 2 * 1024 * 1024) return alert('图片不能超过 2MB');
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const maxW = 300, scale = Math.min(1, maxW / img.width);
+      const c = document.createElement('canvas');
+      c.width = img.width * scale; c.height = img.height * scale;
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const dataUri = c.toDataURL('image/jpeg', 0.75);
+      document.getElementById('modalImage').value = dataUri;
+      const preview = document.getElementById('modalImagePreview');
+      preview.src = dataUri; preview.style.display = 'block';
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
 
 function saveShift() {
   const date = document.getElementById('modalDate').value;
   if (!date) return alert('请选择日期');
+  const editId = document.getElementById('modalEditId').value;
   let hours = 0, earnings = 0;
   if (currentType === 'day') { earnings = 150; }
   else {
     hours = parseFloat(document.getElementById('modalHours').value);
     if (!hours || hours <= 0) return alert('请输入晚班时长');
-    earnings = Math.round(hours * 25);
+    earnings = Math.ceil(hours) * 25; // 不足1小时按1小时
   }
-  addRecord({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date, type: currentType, hours: currentType === 'night' ? hours : 0, earnings, note: document.getElementById('modalNote').value.trim() || '' });
+  const record = {
+    id: editId || (Date.now().toString(36) + Math.random().toString(36).slice(2, 6)),
+    date, type: currentType,
+    hours: currentType === 'night' ? hours : 0,
+    earnings,
+    clockIn: document.getElementById('modalClockIn').value || '',
+    clockOut: document.getElementById('modalClockOut').value || '',
+    image: document.getElementById('modalImage').value || '',
+    note: document.getElementById('modalNote').value.trim() || '',
+  };
+
+  if (editId) {
+    // Update existing
+    const data = loadData();
+    const idx = data.findIndex(r => r.id === editId);
+    if (idx !== -1) data[idx] = record;
+    saveData(data);
+  } else {
+    addRecord(record);
+  }
   closeShiftModal();
   currentPage = 1;
   renderAll();
