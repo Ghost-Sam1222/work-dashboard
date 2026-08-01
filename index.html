@@ -391,23 +391,36 @@ function loadMeta() {
 function saveMeta(meta) { localStorage.setItem(META_KEY, JSON.stringify(meta)); }
 
 // ── Compute ──
+function getLedgerRange(ledgerId) {
+  try {
+    const raw = localStorage.getItem('ledger-' + ledgerId + '-settings');
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s.dateStart && s.dateEnd) return { start: s.dateStart, end: s.dateEnd };
+    }
+  } catch {}
+  const now = new Date();
+  return {
+    start: new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0],
+    end: now.toISOString().split('T')[0],
+  };
+}
+
 function getLedgerTotal(ledgerId) {
   try {
     const data = JSON.parse(localStorage.getItem('ledger-' + ledgerId)) || [];
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    return data.filter(r => r.date >= monthStart).reduce((s, r) => s + (r.earnings || 0), 0);
+    const range = getLedgerRange(ledgerId);
+    return data.filter(r => r.date >= range.start && r.date <= range.end).reduce((s, r) => s + (r.earnings || 0), 0);
   } catch { return 0; }
 }
 
 function getLedgerStats(ledgerId) {
   try {
     const data = JSON.parse(localStorage.getItem('ledger-' + ledgerId)) || [];
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    const monthData = data.filter(r => r.date >= monthStart);
-    const workDays = new Set(monthData.map(r => r.date)).size;
-    return { total: monthData.reduce((s, r) => s + (r.earnings || 0), 0), workDays, records: monthData.length };
+    const range = getLedgerRange(ledgerId);
+    const rangeData = data.filter(r => r.date >= range.start && r.date <= range.end);
+    const workDays = new Set(rangeData.map(r => r.date)).size;
+    return { total: rangeData.reduce((s, r) => s + (r.earnings || 0), 0), workDays, records: rangeData.length };
   } catch { return { total: 0, workDays: 0, records: 0 }; }
 }
 
@@ -424,11 +437,10 @@ function renderAll() {
     stats.workDays && allWorkDays.add(l.id); // approximate
     // Better: collect all dates
     try {
+      const range = getLedgerRange(l.id);
       const data = JSON.parse(localStorage.getItem('ledger-' + l.id)) || [];
-      const now = new Date();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-      data.filter(r => r.date >= monthStart).forEach(r => allWorkDays.add(r.date));
-      allRecords += data.filter(r => r.date >= monthStart).length;
+      data.filter(r => r.date >= range.start && r.date <= range.end).forEach(r => allWorkDays.add(r.date));
+      allRecords += data.filter(r => r.date >= range.start && r.date <= range.end).length;
     } catch {}
 
     const preset = l.preset || 1;
@@ -441,7 +453,7 @@ function renderAll() {
         </div>
         <div class="ledger-total">
           <div class="amount">¥${stats.total.toLocaleString()}</div>
-          <div class="period">本月</div>
+          <div class="period">统计区间</div>
         </div>
         <span class="ledger-arrow">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
@@ -451,7 +463,7 @@ function renderAll() {
 
   document.getElementById('heroTotal').textContent = grandTotal.toLocaleString();
   document.getElementById('heroLabel').textContent =
-    meta.length === 0 ? '还没有子账本' : `${meta.length} 个子账本 · 本月合计`;
+    meta.length === 0 ? '还没有子账本' : `${meta.length} 个子账本 · 统计区间合计`;
 
   const cardsEl = document.getElementById('ledgerCards');
   if (meta.length === 0) {

@@ -4,12 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>班次收入看板</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js">
-</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
   :root {
     color-scheme: dark;
-    /* dataviz palette — dark surface */
     --surface-1:      #1a1a19;
     --surface-2:      #222221;
     --page-plane:     #0d0d0d;
@@ -19,10 +17,9 @@
     --gridline:       #2c2c2a;
     --baseline:       #383835;
     --border:         rgba(255,255,255,0.08);
-    --series-1:       #3987e5;   /* blue — day shift */
-    --series-2:       #d95926;   /* orange — night shift */
+    --series-1:       #3987e5;
+    --series-2:       #d95926;
     --good:           #0ca30c;
-    --warning:        #fab219;
     --critical:       #d03b3b;
     --radius:         16px;
     --radius-sm:      10px;
@@ -41,174 +38,72 @@
   }
 
   /* ── Header ── */
-  .back-link {
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    padding: 6px;
-    margin-right: 8px;
-    border-radius: 8px;
-    transition: color .15s, background .15s;
-    flex-shrink: 0;
-    margin-bottom: 2px;
-  }
+  .back-link { color: var(--text-muted); display: flex; align-items: center; padding: 6px; margin-right: 8px; border-radius: 8px; transition: color .15s, background .15s; flex-shrink: 0; margin-bottom: 2px; }
   .back-link:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
-  .header {
-    padding: 28px 24px 20px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
+  .header { padding: 28px 24px 20px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   .header-top { display: flex; align-items: flex-end; }
-  .header-left h1 {
-    font-size: 22px;
-    font-weight: 640;
-    letter-spacing: -0.01em;
-    color: var(--text-secondary);
-  }
-  .hero-figure {
-    font-size: 56px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1;
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-  }
+  .header-left h1 { font-size: 22px; font-weight: 640; letter-spacing: -0.01em; color: var(--text-secondary); }
+  .hero-figure { font-size: 56px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; color: var(--text-primary); font-variant-numeric: tabular-nums; }
   .hero-figure .currency { font-size: 28px; font-weight: 500; color: var(--text-secondary); margin-right: 2px; }
-  .hero-label {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
+  .hero-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 20px;
-    border-radius: 999px;
-    font-size: 14px;
-    font-weight: 590;
-    font-family: var(--font);
-    cursor: pointer;
-    border: none;
-    transition: opacity .15s, transform .1s;
-  }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 999px; font-size: 14px; font-weight: 590; font-family: var(--font); cursor: pointer; border: none; transition: opacity .15s, transform .1s; }
   .btn:active { transform: scale(0.97); }
-  .btn-primary {
-    background: var(--series-1);
-    color: #fff;
-  }
+  .btn-primary { background: var(--series-1); color: #fff; }
   .btn-primary:hover { opacity: .88; }
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-  }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
   .btn-ghost:hover { background: rgba(255,255,255,0.04); }
   .btn-sm { padding: 5px 12px; font-size: 12px; }
-  .btn-danger { color: var(--critical); border-color: transparent; }
-  .btn-danger:hover { background: rgba(208,59,59,0.12); }
+
+  /* ── Date range bar ── */
+  .date-range-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 24px 20px;
+    flex-wrap: wrap;
+  }
+  .date-range-bar .dr-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .date-range-bar input[type="date"] {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: var(--font);
+    padding: 6px 14px;
+    outline: none;
+    width: 140px;
+  }
+  .date-range-bar input[type="date"]:focus { border-color: var(--series-1); }
+  .date-range-bar .dr-sep { color: var(--text-muted); font-size: 13px; }
+  .dr-summary { font-size: 12px; color: var(--text-muted); }
 
   /* ── KPI Row ── */
-  .kpi-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    padding: 0 24px 24px;
-  }
-  .kpi-card {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-  }
-  .kpi-card .label {
-    font-size: 12px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 6px;
-  }
-  .kpi-card .value {
-    font-size: 28px;
-    font-weight: 680;
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-  }
-  .kpi-card .sub {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-top: 2px;
-  }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 24px 24px; }
+  .kpi-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+  .kpi-card .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .kpi-card .value { font-size: 28px; font-weight: 680; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .kpi-card .sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 
   /* ── Charts Grid ── */
-  .charts-grid {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 12px;
-    padding: 0 24px 16px;
-  }
-  .chart-panel {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-  }
+  .charts-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; padding: 0 24px 16px; }
+  .chart-panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
   .chart-panel.full { grid-column: 1 / -1; }
-  .chart-panel h3 {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    margin-bottom: 14px;
-    letter-spacing: -0.01em;
-  }
-  .chart-wrap {
-    position: relative;
-    width: 100%;
-  }
-  .chart-wrap.doughnut {
-    max-width: 260px;
-    margin: 0 auto;
-  }
+  .chart-panel h3 { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 14px; }
+  .chart-wrap { position: relative; width: 100%; }
+  .chart-wrap.doughnut { max-width: 260px; margin: 0 auto; }
   .chart-wrap canvas { width: 100% !important; }
 
   /* ── History ── */
-  .history-panel {
-    margin: 0 24px 40px;
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-  .history-panel h3 {
-    padding: 18px 20px 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-secondary);
-  }
-  .history-list { max-height: 420px; overflow-y: auto; }
-  .history-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--border);
-    gap: 12px;
-    transition: background .1s;
-  }
+  .history-panel { margin: 0 24px 16px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .history-panel h3 { padding: 18px 20px 12px; font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+  .history-item { display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border); gap: 12px; transition: background .1s; }
   .history-item:last-child { border-bottom: none; }
   .history-item:hover { background: rgba(255,255,255,0.02); }
 
-  .shift-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 620;
-    letter-spacing: 0.02em;
-  }
+  .shift-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 620; letter-spacing: 0.02em; }
   .shift-badge.day { background: rgba(57,135,229,0.18); color: var(--series-1); }
   .shift-badge.night { background: rgba(217,89,38,0.18); color: var(--series-2); }
 
@@ -219,139 +114,46 @@
   .history-item:hover .history-del { opacity: .6; }
   .history-del:hover { opacity: 1 !important; }
 
-  .empty-state {
-    text-align: center;
-    padding: 48px 20px;
-    color: var(--text-muted);
-  }
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
   .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
   .empty-state p { font-size: 14px; }
 
-  /* ── Modal ── */
-  .overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .2s;
-  }
-  .overlay.active { opacity: 1; pointer-events: auto; }
+  /* ── Pagination ── */
+  .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--border); }
+  .pagination .page-btn { padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 590; font-family: var(--font); cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); transition: all .12s; }
+  .pagination .page-btn:hover:not(:disabled) { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+  .pagination .page-btn:disabled { opacity: 0.3; cursor: default; }
+  .pagination .page-info { font-size: 12px; color: var(--text-muted); min-width: 80px; text-align: center; }
 
-  .modal {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px 24px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 24px 48px rgba(0,0,0,0.4);
-  }
-  .modal h2 {
-    font-size: 18px;
-    font-weight: 640;
-    margin-bottom: 20px;
-    letter-spacing: -0.01em;
-  }
-  .field {
-    margin-bottom: 16px;
-  }
-  .field label {
-    display: block;
-    font-size: 12px;
-    font-weight: 590;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  .field input, .field select {
-    width: 100%;
-    padding: 10px 14px;
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text-primary);
-    font-size: 15px;
-    font-family: var(--font);
-    outline: none;
-    transition: border-color .15s;
-  }
+  /* ── Modal ── */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .overlay.active { opacity: 1; pointer-events: auto; }
+  .modal { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; width: 90%; max-width: 400px; box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+  .modal h2 { font-size: 18px; font-weight: 640; margin-bottom: 20px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; font-weight: 590; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .field input, .field select { width: 100%; padding: 10px 14px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 15px; font-family: var(--font); outline: none; transition: border-color .15s; }
   .field input:focus, .field select:focus { border-color: var(--series-1); }
 
-  .type-toggle {
-    display: flex;
-    gap: 0;
-    background: var(--surface-1);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    overflow: hidden;
-  }
-  .type-toggle button {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-family: var(--font);
-    font-weight: 590;
-    cursor: pointer;
-    transition: all .15s;
-  }
-  .type-toggle button.active-day {
-    background: var(--series-1);
-    color: #fff;
-  }
-  .type-toggle button.active-night {
-    background: var(--series-2);
-    color: #fff;
-  }
+  .type-toggle { display: flex; gap: 0; background: var(--surface-1); border-radius: var(--radius-sm); border: 1px solid var(--border); overflow: hidden; }
+  .type-toggle button { flex: 1; padding: 10px; border: none; background: transparent; color: var(--text-secondary); font-size: 14px; font-family: var(--font); font-weight: 590; cursor: pointer; transition: all .15s; }
+  .type-toggle button.active-day { background: var(--series-1); color: #fff; }
+  .type-toggle button.active-night { background: var(--series-2); color: #fff; }
 
-  .modal-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    margin-top: 20px;
-  }
-
-  .earning-preview {
-    text-align: center;
-    padding: 10px;
-    background: var(--surface-1);
-    border-radius: var(--radius-sm);
-    font-size: 20px;
-    font-weight: 680;
-    color: var(--text-primary);
-    letter-spacing: -0.01em;
-  }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+  .earning-preview { text-align: center; padding: 10px; background: var(--surface-1); border-radius: var(--radius-sm); font-size: 20px; font-weight: 680; color: var(--text-primary); }
 
   /* ── Responsive ── */
   @media (max-width: 768px) {
     .header { padding: 20px 16px 16px; }
     .hero-figure { font-size: 42px; }
     .hero-figure .currency { font-size: 22px; }
-    .kpi-row {
-      grid-template-columns: repeat(2, 1fr);
-      padding: 0 16px 16px;
-      gap: 8px;
-    }
-    .charts-grid {
-      grid-template-columns: 1fr;
-      padding: 0 16px 8px;
-    }
-    .history-panel { margin: 0 16px 32px; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); padding: 0 16px 16px; gap: 8px; }
+    .charts-grid { grid-template-columns: 1fr; padding: 0 16px 8px; }
+    .history-panel { margin: 0 16px 16px; }
     .chart-wrap.doughnut { max-width: 220px; }
-  }
-  @media (max-width: 400px) {
-    .kpi-row { grid-template-columns: 1fr 1fr; }
-    .kpi-card .value { font-size: 22px; }
+    .date-range-bar { padding: 0 16px 16px; }
+    .date-range-bar input[type="date"] { width: 120px; }
   }
 </style>
 </head>
@@ -364,17 +166,26 @@
       <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3L5 8l6 5"/></svg>
     </a>
     <div class="header-left">
-    <h1>班次收入</h1>
-    <div class="hero-figure">
-      <span class="currency">¥</span><span id="heroTotal">0</span>
+      <h1>班次收入</h1>
+      <div class="hero-figure">
+        <span class="currency">¥</span><span id="heroTotal">0</span>
+      </div>
+      <div class="hero-label" id="heroLabel">统计区间收入</div>
     </div>
-    <div class="hero-label" id="heroLabel">本月累计收入</div>
-  </div>
   </div>
   <button class="btn btn-primary" onclick="openModal()">
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
     添加班次
   </button>
+</div>
+
+<!-- ── Date Range ── -->
+<div class="date-range-bar">
+  <span class="dr-label">统计区间</span>
+  <input type="date" id="drStart" onchange="onDateRangeChange()">
+  <span class="dr-sep">→</span>
+  <input type="date" id="drEnd" onchange="onDateRangeChange()">
+  <span class="dr-summary" id="drSummary"></span>
 </div>
 
 <!-- ── KPI Row ── -->
@@ -390,7 +201,7 @@
     <div class="sub">25 元/小时</div>
   </div>
   <div class="kpi-card">
-    <div class="label">总工时</div>
+    <div class="label">晚班总工时</div>
     <div class="value" id="kpiHours">0<span style="font-size:16px;font-weight:500;color:var(--text-secondary)"> h</span></div>
     <div class="sub">晚班累计小时</div>
   </div>
@@ -425,12 +236,14 @@
 
 <!-- ── History ── -->
 <div class="history-panel">
-  <h3>班次记录</h3>
+  <h3>班次记录 <span style="font-weight:400;font-size:12px;color:var(--text-muted)" id="historyCount"></span></h3>
   <div class="history-list" id="historyList">
-    <div class="empty-state">
-      <div class="icon">📋</div>
-      <p>暂无记录，点击上方按钮添加班次</p>
-    </div>
+    <div class="empty-state"><div class="icon">📋</div><p>暂无记录，点击上方按钮添加班次</p></div>
+  </div>
+  <div class="pagination" id="pagination" style="display:none">
+    <button class="page-btn" id="pagePrev" onclick="changePage(-1)">← 上一页</button>
+    <span class="page-info" id="pageInfo"></span>
+    <button class="page-btn" id="pageNext" onclick="changePage(1)">下一页 →</button>
   </div>
 </div>
 
@@ -444,7 +257,7 @@
     </div>
     <div class="field">
       <label>班次类型</label>
-      <div class="type-toggle" id="typeToggle">
+      <div class="type-toggle">
         <button id="btnDay" class="active-day" onclick="setType('day')">☀️ 白班</button>
         <button id="btnNight" onclick="setType('night')">🌙 晚班</button>
       </div>
@@ -457,7 +270,7 @@
       <label>预计收入</label>
       <div class="earning-preview" id="earningPreview">¥0</div>
     </div>
-    <div class="field" id="noteField">
+    <div class="field">
       <label>备注（可选）</label>
       <input type="text" id="modalNote" placeholder="如：替班、加班">
     </div>
@@ -471,60 +284,79 @@
 <script>
 // ── Data layer ──
 const STORAGE_KEY = 'ledger-work';
-// Migrate old data if present
+const SETTINGS_KEY = 'ledger-work-settings';
+const PER_PAGE = 12;
+
+// Migrate old data
 if (!localStorage.getItem(STORAGE_KEY) && localStorage.getItem('work-schedule-data')) {
   localStorage.setItem(STORAGE_KEY, localStorage.getItem('work-schedule-data'));
 }
+
 let currentType = 'day';
+let currentPage = 1;
 
 function loadData() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
   catch { return []; }
 }
 function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+function addRecord(record) { const d = loadData(); d.push(record); saveData(d); }
+function deleteRecord(id) { saveData(loadData().filter(r => r.id !== id)); }
 
-function addRecord(record) {
-  const data = loadData();
-  data.push(record);
-  saveData(data);
+// ── Settings (date range) ──
+const DEFAULT_SETTINGS = { dateStart: '2026-07-27', dateEnd: '2026-08-19' };
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(DEFAULT_SETTINGS));
+  return DEFAULT_SETTINGS;
 }
+function saveSettings(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
 
-function deleteRecord(id) {
-  saveData(loadData().filter(r => r.id !== id));
+// ── Filter by date range ──
+function filterByRange(data, start, end) {
+  return data.filter(r => r.date >= start && r.date <= end);
 }
 
 // ── Compute stats ──
-function getStats(data) {
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+function getStats(data, start, end) {
+  const rangeData = filterByRange(data, start, end);
+  const dayShifts = rangeData.filter(r => r.type === 'day');
+  const nightShifts = rangeData.filter(r => r.type === 'night');
 
-  const monthData = data.filter(r => r.date >= monthStart);
-  const dayShifts = monthData.filter(r => r.type === 'day');
-  const nightShifts = monthData.filter(r => r.type === 'night');
-
-  const totalEarnings = monthData.reduce((s, r) => s + r.earnings, 0);
+  const totalEarnings = rangeData.reduce((s, r) => s + r.earnings, 0);
   const dayCount = dayShifts.length;
   const nightCount = nightShifts.length;
   const totalNightHours = nightShifts.reduce((s, r) => s + (r.hours || 0), 0);
 
-  // Unique days with work
-  const workDays = new Set(monthData.map(r => r.date)).size;
+  const workDays = new Set(rangeData.map(r => r.date)).size;
   const avgDaily = workDays > 0 ? Math.round(totalEarnings / workDays) : 0;
 
-  return { totalEarnings, dayCount, nightCount, totalNightHours, avgDaily, workDays, monthStart };
+  // Total days in range
+  const d1 = new Date(start), d2 = new Date(end);
+  const totalDays = Math.floor((d2 - d1) / 86400000) + 1;
+
+  return { totalEarnings, dayCount, nightCount, totalNightHours, avgDaily, workDays, totalDays, start, end, rangeData };
 }
 
 // ── Render ──
 let pieChart, barChart, lineChart;
 
 function renderAll() {
+  const settings = loadSettings();
+  document.getElementById('drStart').value = settings.dateStart;
+  document.getElementById('drEnd').value = settings.dateEnd;
+
   const data = loadData();
-  const stats = getStats(data);
+  const stats = getStats(data, settings.dateStart, settings.dateEnd);
 
   // Hero
   document.getElementById('heroTotal').textContent = stats.totalEarnings.toLocaleString();
-  document.getElementById('heroLabel').textContent =
-    `本月累计收入（${stats.monthStart} 起）`;
+  document.getElementById('heroLabel').textContent = `${stats.start} → ${stats.end}`;
+  document.getElementById('drSummary').textContent = `共 ${stats.totalDays} 天 · ${stats.workDays} 天有班`;
 
   // KPI
   document.getElementById('kpiDayCount').textContent = stats.dayCount;
@@ -534,10 +366,10 @@ function renderAll() {
   document.getElementById('kpiAvgLabel').textContent = stats.workDays + ' 个工作日';
 
   // Charts
-  renderPieChart(stats);
-  renderBarChart(data);
-  renderLineChart(data);
-  renderHistory(data);
+  renderPieChart(data, stats);
+  renderBarChart(data, settings.dateStart, settings.dateEnd);
+  renderLineChart(data, settings.dateStart, settings.dateEnd);
+  renderHistory(data, settings.dateStart, settings.dateEnd);
 }
 
 function destroyChart(key) {
@@ -546,36 +378,18 @@ function destroyChart(key) {
   if (key === 'line' && lineChart) { lineChart.destroy(); lineChart = null; }
 }
 
-function renderPieChart(stats) {
+function renderPieChart(data, stats) {
   destroyChart('pie');
   const ctx = document.getElementById('pieChart').getContext('2d');
 
   const dayEarnings = stats.dayCount * 150;
-  const nightEarnings = stats.nightCount > 0
-    ? loadData().filter(r => r.type === 'night' && r.date >= stats.monthStart).reduce((s, r) => s + r.earnings, 0)
-    : 0;
+  const nightEarnings = stats.rangeData.filter(r => r.type === 'night').reduce((s, r) => s + r.earnings, 0);
 
   if (dayEarnings === 0 && nightEarnings === 0) {
     pieChart = new Chart(ctx, {
       type: 'doughnut',
-      data: {
-        labels: ['暂无数据'],
-        datasets: [{
-          data: [1],
-          backgroundColor: ['#2c2c2a'],
-          borderColor: '#1a1a19',
-          borderWidth: 2,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        cutout: '65%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false },
-        },
-      },
+      data: { labels: ['暂无数据'], datasets: [{ data: [1], backgroundColor: ['#2c2c2a'], borderColor: '#1a1a19', borderWidth: 2 }] },
+      options: { responsive: true, maintainAspectRatio: true, cutout: '65%', plugins: { legend: { display: false }, tooltip: { enabled: false } } },
     });
     return;
   }
@@ -584,73 +398,42 @@ function renderPieChart(stats) {
     type: 'doughnut',
     data: {
       labels: ['白班', '晚班'],
-      datasets: [{
-        data: [dayEarnings, nightEarnings],
-        backgroundColor: ['#3987e5', '#d95926'],
-        borderColor: '#1a1a19',
-        borderWidth: 2,
-        hoverBorderWidth: 2,
-      }],
+      datasets: [{ data: [dayEarnings, nightEarnings], backgroundColor: ['#3987e5', '#d95926'], borderColor: '#1a1a19', borderWidth: 2 }],
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      cutout: '58%',
+      responsive: true, maintainAspectRatio: true, cutout: '58%',
       plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            color: '#c3c2b7',
-            padding: 20,
-            font: { family: "system-ui, sans-serif", size: 13 },
-            usePointStyle: true,
-            pointStyleWidth: 10,
-          },
-        },
+        legend: { position: 'bottom', labels: { color: '#c3c2b7', padding: 20, font: { family: 'system-ui, sans-serif', size: 13 }, usePointStyle: true, pointStyleWidth: 10 } },
         tooltip: {
-          backgroundColor: '#222221',
-          titleColor: '#ffffff',
-          bodyColor: '#c3c2b7',
-          borderColor: 'rgba(255,255,255,0.08)',
-          borderWidth: 1,
-          cornerRadius: 8,
-          padding: 10,
-          callbacks: {
-            label: ctx => ` ${ctx.label}: ¥${ctx.raw.toLocaleString()}（${((ctx.raw / (dayEarnings + nightEarnings)) * 100).toFixed(1)}%）`,
-          },
+          backgroundColor: '#222221', titleColor: '#ffffff', bodyColor: '#c3c2b7', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 8, padding: 10,
+          callbacks: { label: ctx => ` ${ctx.label}: ¥${ctx.raw.toLocaleString()}（${((ctx.raw / (dayEarnings + nightEarnings)) * 100).toFixed(1)}%）` },
         },
       },
     },
   });
 }
 
-function renderBarChart(data) {
+function renderBarChart(data, dateStart, dateEnd) {
   destroyChart('bar');
   const ctx = document.getElementById('barChart').getContext('2d');
 
-  // Last 30 days
+  // Build date list from range
   const days = [];
-  const now = new Date();
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
+  const d = new Date(dateStart + 'T00:00:00');
+  const end = new Date(dateEnd + 'T00:00:00');
+  while (d <= end) {
     days.push(d.toISOString().split('T')[0]);
+    d.setDate(d.getDate() + 1);
   }
 
   const earningsByDay = {};
-  data.forEach(r => {
-    if (days.includes(r.date)) {
-      earningsByDay[r.date] = (earningsByDay[r.date] || 0) + r.earnings;
-    }
-  });
+  data.forEach(r => { if (days.includes(r.date)) earningsByDay[r.date] = (earningsByDay[r.date] || 0) + r.earnings; });
 
   const values = days.map(d => earningsByDay[d] || 0);
-  const labels = days.map(d => {
-    const parts = d.split('-');
-    return parts[1] + '/' + parts[2]; // MM/DD
-  });
+  const labels = days.map(d => { const p = d.split('-'); return p[1] + '/' + p[2]; });
 
-  const hasData = values.some(v => v > 0);
+  // Show fewer labels if range > 30 days
+  const labelStep = days.length > 30 ? Math.ceil(days.length / 25) : 1;
 
   barChart = new Chart(ctx, {
     type: 'bar',
@@ -665,97 +448,46 @@ function renderBarChart(data) {
       }],
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#222221',
-          titleColor: '#ffffff',
-          bodyColor: '#c3c2b7',
-          borderColor: 'rgba(255,255,255,0.08)',
-          borderWidth: 1,
-          cornerRadius: 8,
-          padding: 10,
-          callbacks: {
-            title: items => days[items[0].dataIndex],
-            label: ctx => ctx.raw > 0 ? ` ¥${ctx.raw.toLocaleString()}` : ' 无班次',
-          },
+          backgroundColor: '#222221', titleColor: '#ffffff', bodyColor: '#c3c2b7', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 8, padding: 10,
+          callbacks: { title: items => days[items[0].dataIndex], label: ctx => ctx.raw > 0 ? ` ¥${ctx.raw.toLocaleString()}` : ' 无班次' },
         },
       },
       scales: {
         x: {
           grid: { display: false },
-          ticks: {
-            color: '#898781',
-            font: { size: 10 },
-            maxTicksLimit: 15,
-            autoSkip: true,
-          },
+          ticks: { color: '#898781', font: { size: 10 }, maxTicksLimit: 25, autoSkip: true },
           border: { color: '#383835' },
         },
-        y: {
-          grid: { color: '#2c2c2a' },
-          ticks: {
-            color: '#898781',
-            font: { size: 11 },
-            callback: v => '¥' + v,
-          },
-          border: { color: '#383835' },
-          beginAtZero: true,
-        },
+        y: { grid: { color: '#2c2c2a' }, ticks: { color: '#898781', font: { size: 11 }, callback: v => '¥' + v }, border: { color: '#383835' }, beginAtZero: true },
       },
     },
   });
 }
 
-function renderLineChart(data) {
+function renderLineChart(data, dateStart, dateEnd) {
   destroyChart('line');
   const ctx = document.getElementById('lineChart').getContext('2d');
 
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-  const monthData = data.filter(r => r.date >= monthStart).sort((a, b) => a.date.localeCompare(b.date));
+  const rangeData = filterByRange(data, dateStart, dateEnd).sort((a, b) => a.date.localeCompare(b.date));
 
-  if (monthData.length === 0) {
+  if (rangeData.length === 0) {
     lineChart = new Chart(ctx, {
       type: 'line',
-      data: {
-        labels: [monthStart, now.toISOString().split('T')[0]],
-        datasets: [{
-          data: [0, 0],
-          borderColor: '#2c2c2a',
-          borderWidth: 2,
-          pointRadius: 0,
-          tension: 0.3,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { enabled: false } },
-        scales: {
-          x: { display: false },
-          y: { display: false },
-        },
-      },
+      data: { labels: [dateStart, dateEnd], datasets: [{ data: [0, 0], borderColor: '#2c2c2a', borderWidth: 2, pointRadius: 0, tension: 0.3 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } },
     });
     return;
   }
 
-  // Cumulative earnings
-  const labels = [];
-  const cumulative = [];
+  const labels = [], cumulative = [];
   let running = 0;
-
-  // Group by date
   const byDate = {};
-  monthData.forEach(r => {
-    byDate[r.date] = (byDate[r.date] || 0) + r.earnings;
-  });
-
-  const sortedDates = Object.keys(byDate).sort();
-  sortedDates.forEach(date => {
+  rangeData.forEach(r => { byDate[r.date] = (byDate[r.date] || 0) + r.earnings; });
+  Object.keys(byDate).sort().forEach(date => {
     running += byDate[date];
     labels.push(date.split('-').slice(1).join('/'));
     cumulative.push(running);
@@ -766,96 +498,97 @@ function renderLineChart(data) {
     data: {
       labels,
       datasets: [{
-        label: '累计收入',
-        data: cumulative,
-        borderColor: '#d95926',
-        backgroundColor: 'rgba(217,89,38,0.08)',
-        borderWidth: 2,
-        pointRadius: 4,
-        pointBackgroundColor: '#d95926',
-        pointBorderColor: '#1a1a19',
-        pointBorderWidth: 2,
-        pointHoverRadius: 8,
-        fill: true,
-        tension: 0.3,
+        label: '累计收入', data: cumulative,
+        borderColor: '#d95926', backgroundColor: 'rgba(217,89,38,0.08)',
+        borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#d95926', pointBorderColor: '#1a1a19', pointBorderWidth: 2, pointHoverRadius: 8,
+        fill: true, tension: 0.3,
       }],
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        intersect: false,
-        mode: 'index',
-      },
+      responsive: true, maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#222221',
-          titleColor: '#ffffff',
-          bodyColor: '#d95926',
-          borderColor: 'rgba(255,255,255,0.08)',
-          borderWidth: 1,
-          cornerRadius: 8,
-          padding: 10,
-          displayColors: false,
-          callbacks: {
-            label: ctx => `累计 ¥${ctx.raw.toLocaleString()}`,
-          },
+          backgroundColor: '#222221', titleColor: '#ffffff', bodyColor: '#d95926', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 8, padding: 10, displayColors: false,
+          callbacks: { label: ctx => `累计 ¥${ctx.raw.toLocaleString()}` },
         },
       },
       scales: {
-        x: {
-          grid: { display: false },
-          ticks: { color: '#898781', font: { size: 11 }, maxTicksLimit: 15 },
-          border: { color: '#383835' },
-        },
-        y: {
-          grid: { color: '#2c2c2a' },
-          ticks: {
-            color: '#898781',
-            font: { size: 11 },
-            callback: v => '¥' + v.toLocaleString(),
-          },
-          border: { color: '#383835' },
-          beginAtZero: true,
-        },
+        x: { grid: { display: false }, ticks: { color: '#898781', font: { size: 11 }, maxTicksLimit: 15 }, border: { color: '#383835' } },
+        y: { grid: { color: '#2c2c2a' }, ticks: { color: '#898781', font: { size: 11 }, callback: v => '¥' + v.toLocaleString() }, border: { color: '#383835' }, beginAtZero: true },
       },
     },
   });
 }
 
-function renderHistory(data) {
-  const el = document.getElementById('historyList');
+// ── History with pagination ──
+function renderHistory(data, dateStart, dateEnd) {
   const sorted = [...data].sort((a, b) => b.date.localeCompare(a.date));
+  const totalPages = Math.ceil(sorted.length / PER_PAGE) || 1;
+
+  // Clamp current page
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  document.getElementById('historyCount').textContent = `（共 ${sorted.length} 条）`;
+  const el = document.getElementById('historyList');
 
   if (sorted.length === 0) {
     el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>暂无记录，点击上方按钮添加班次</p></div>`;
+    document.getElementById('pagination').style.display = 'none';
     return;
   }
 
-  el.innerHTML = sorted.map(r => {
+  const start = (currentPage - 1) * PER_PAGE;
+  const pageItems = sorted.slice(start, start + PER_PAGE);
+
+  el.innerHTML = pageItems.map(r => {
     const badgeClass = r.type === 'day' ? 'day' : 'night';
     const badgeText = r.type === 'day' ? '☀️ 白班' : '🌙 晚班';
-    let detailText = r.type === 'day'
-      ? '8:20 — 18:00 · 150 元'
-      : `${r.hours} 小时 · ¥${r.earnings}`;
+    let detailText = r.type === 'day' ? '8:20 — 18:00 · 150 元' : `${r.hours} 小时 · ¥${r.earnings}`;
     if (r.note) detailText += ` · ${r.note}`;
     const dateDisplay = r.date.split('-').slice(1).join('/');
 
-    return `
-      <div class="history-item">
-        <span class="history-date">${dateDisplay}</span>
-        <span class="shift-badge ${badgeClass}">${badgeText}</span>
-        <span class="history-detail">${detailText}</span>
-        <span class="history-earnings">¥${r.earnings}</span>
-        <span class="history-del" title="删除" onclick="event.stopPropagation(); removeShift('${r.id}')">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="4" x2="14" y2="4"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5"/><line x1="3" y1="4" x2="13" y2="4" stroke="#d03b3b"/></svg>
-        </span>
-      </div>`;
+    return `<div class="history-item">
+      <span class="history-date">${dateDisplay}</span>
+      <span class="shift-badge ${badgeClass}">${badgeText}</span>
+      <span class="history-detail">${detailText}</span>
+      <span class="history-earnings">¥${r.earnings}</span>
+      <span class="history-del" title="删除" onclick="event.stopPropagation(); removeShift('${r.id}')">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="4" x2="14" y2="4"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5"/><line x1="3" y1="4" x2="13" y2="4" stroke="#d03b3b"/></svg>
+      </span>
+    </div>`;
   }).join('');
+
+  // Pagination UI
+  const pagEl = document.getElementById('pagination');
+  if (totalPages > 1) {
+    pagEl.style.display = 'flex';
+    document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
+    document.getElementById('pagePrev').disabled = currentPage <= 1;
+    document.getElementById('pageNext').disabled = currentPage >= totalPages;
+  } else {
+    pagEl.style.display = 'none';
+  }
 }
 
-// ── Modal logic ──
+function changePage(delta) {
+  currentPage += delta;
+  renderAll();
+}
+
+// ── Date range change ──
+function onDateRangeChange() {
+  const s = document.getElementById('drStart').value;
+  const e = document.getElementById('drEnd').value;
+  if (!s || !e) return;
+  saveSettings({ dateStart: s, dateEnd: e });
+  currentPage = 1;
+  renderAll();
+}
+
+// ── Modal ──
 function openModal() {
   document.getElementById('overlay').classList.add('active');
   document.getElementById('modalDate').value = new Date().toISOString().split('T')[0];
@@ -863,66 +596,50 @@ function openModal() {
   document.getElementById('modalHours').value = '';
   document.getElementById('modalNote').value = '';
 }
-
-function closeModal() {
-  document.getElementById('overlay').classList.remove('active');
-}
+function closeModal() { document.getElementById('overlay').classList.remove('active'); }
 
 function setType(type) {
   currentType = type;
-  const btnDay = document.getElementById('btnDay');
-  const btnNight = document.getElementById('btnNight');
   const hoursField = document.getElementById('hoursField');
   const previewField = document.getElementById('previewField');
-
   if (type === 'day') {
-    btnDay.className = 'active-day';
-    btnNight.className = '';
+    document.getElementById('btnDay').className = 'active-day';
+    document.getElementById('btnNight').className = '';
     hoursField.style.display = 'none';
     previewField.style.display = 'none';
     document.getElementById('modalHours').value = '';
-    document.getElementById('earningPreview').textContent = '¥150';
   } else {
-    btnDay.className = '';
-    btnNight.className = 'active-night';
+    document.getElementById('btnDay').className = '';
+    document.getElementById('btnNight').className = 'active-night';
     hoursField.style.display = 'block';
     previewField.style.display = 'block';
     updatePreview();
   }
 }
-
 function updatePreview() {
-  const hours = parseFloat(document.getElementById('modalHours').value) || 0;
-  document.getElementById('earningPreview').textContent = '¥' + (hours * 25);
+  document.getElementById('earningPreview').textContent = '¥' + ((parseFloat(document.getElementById('modalHours').value) || 0) * 25);
 }
-
 document.getElementById('modalHours').addEventListener('input', updatePreview);
 
 function saveShift() {
   const date = document.getElementById('modalDate').value;
   if (!date) return alert('请选择日期');
-
   let hours = 0, earnings = 0;
-  if (currentType === 'day') {
-    earnings = 150;
-  } else {
+  if (currentType === 'day') { earnings = 150; }
+  else {
     hours = parseFloat(document.getElementById('modalHours').value);
     if (!hours || hours <= 0) return alert('请输入晚班时长');
     earnings = Math.round(hours * 25);
   }
-
-  const note = document.getElementById('modalNote').value.trim();
-  const record = {
+  addRecord({
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    date,
-    type: currentType,
+    date, type: currentType,
     hours: currentType === 'night' ? hours : 0,
     earnings,
-    note: note || '',
-  };
-
-  addRecord(record);
+    note: document.getElementById('modalNote').value.trim() || '',
+  });
   closeModal();
+  currentPage = 1;
   renderAll();
 }
 
@@ -933,13 +650,8 @@ function removeShift(id) {
 }
 
 // ── Keyboard ──
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-});
-
-document.getElementById('overlay').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeModal();
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.getElementById('overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 
 // ── Init ──
 renderAll();
