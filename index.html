@@ -403,17 +403,26 @@ const DEFAULT_LEDGERS = [
   },
 ];
 
+// Memory fallback for Safari private mode / localStorage failures
+let _memMeta = null;
+function _safeLS(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
+function _safeLSSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
+
 function loadMeta() {
   try {
-    const raw = localStorage.getItem(META_KEY);
-    if (raw) return JSON.parse(raw);
+    const raw = _safeLS(META_KEY);
+    if (raw) { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) return parsed; }
   } catch {}
-  // Seed defaults
-  localStorage.setItem(META_KEY, JSON.stringify(DEFAULT_LEDGERS));
-  return DEFAULT_LEDGERS;
+  if (_memMeta) return _memMeta.slice();
+  _memMeta = DEFAULT_LEDGERS.map(l => ({...l}));
+  _safeLSSet(META_KEY, JSON.stringify(DEFAULT_LEDGERS));
+  return DEFAULT_LEDGERS.map(l => ({...l}));
 }
 
-function saveMeta(meta) { localStorage.setItem(META_KEY, JSON.stringify(meta)); }
+function saveMeta(meta) {
+  _memMeta = meta.map(l => ({...l}));
+  _safeLSSet(META_KEY, JSON.stringify(meta));
+}
 
 // ── Compute ──
 function getLedgerRange(ledgerId) {
@@ -610,7 +619,7 @@ document.getElementById('editOverlay').addEventListener('click', e => {
 });
 
 // ── Init ──
-renderAll();
+try { renderAll(); } catch(e) { console.error(e); }
 </script>
 </body>
 </html>

@@ -313,16 +313,37 @@ const SETTINGS_KEY = 'ledger-work-settings';
 const PER_PAGE = 12;
 const PANELS = ['kpi', 'pie', 'bar', 'line'];
 
-if (!localStorage.getItem(STORAGE_KEY) && localStorage.getItem('work-schedule-data')) {
-  localStorage.setItem(STORAGE_KEY, localStorage.getItem('work-schedule-data'));
-}
+// Migrate legacy data (once)
+(function migrate() {
+  try {
+    if (!localStorage.getItem(STORAGE_KEY) && localStorage.getItem('work-schedule-data')) {
+      localStorage.setItem(STORAGE_KEY, localStorage.getItem('work-schedule-data'));
+    }
+  } catch(e) { /* ignore */ }
+})();
 
 let currentType = 'day';
 let currentPage = 1;
 let pickingPanel = null;
 
-function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
-function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+// Memory fallback for Safari private mode / localStorage failures
+let _memData = null;
+let _memSettings = null;
+
+function _safeGet(k) {
+  try { return localStorage.getItem(k); } catch(e) { console.error('ls get error:', e); return null; }
+}
+function _safeSet(k, v) {
+  try { localStorage.setItem(k, v); return true; } catch(e) { console.error('ls set error:', e); return false; }
+}
+
+function loadData() {
+  try { return JSON.parse(_safeGet(STORAGE_KEY)) || []; } catch { return _memData || []; }
+}
+function saveData(d) {
+  _memData = d;
+  _safeSet(STORAGE_KEY, JSON.stringify(d));
+}
 function addRecord(r) { const d = loadData(); d.push(r); saveData(d); }
 function deleteRecord(id) { saveData(loadData().filter(r => r.id !== id)); }
 
@@ -340,11 +361,19 @@ const DEFAULT_SETTINGS = {
 };
 
 function loadSettings() {
-  try { const raw = localStorage.getItem(SETTINGS_KEY); if (raw) return JSON.parse(raw); } catch {}
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(DEFAULT_SETTINGS));
+  try {
+    const raw = _safeGet(SETTINGS_KEY);
+    if (raw) { const parsed = JSON.parse(raw); if (parsed && parsed.periods) return parsed; }
+  } catch(e) { console.error('loadSettings parse error:', e); }
+  if (_memSettings) return JSON.parse(JSON.stringify(_memSettings));
+  _memSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+  _safeSet(SETTINGS_KEY, JSON.stringify(DEFAULT_SETTINGS));
   return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
 }
-function saveSettings(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+function saveSettings(s) {
+  _memSettings = s;
+  _safeSet(SETTINGS_KEY, JSON.stringify(s));
+}
 
 function getPanelRange(settings, panel) {
   const pr = settings.panelRanges[panel];
@@ -764,7 +793,7 @@ document.getElementById('periodOverlay').addEventListener('click', e => { if (e.
 document.getElementById('rangeOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeRangeModal(); });
 
 // ── Init ──
-renderAll();
+try { renderAll(); } catch(e) { console.error('renderAll failed:', e); }
 </script>
 </body>
 </html>
