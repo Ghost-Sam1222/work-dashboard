@@ -451,7 +451,7 @@ function selectPeriod(idx) {
     syncAllPanelRanges(s, p.start, p.end);
   }
   saveSettings(s);
-  renderAll();
+  safeRender();
 }
 
 function deletePeriod(idx) {
@@ -460,7 +460,7 @@ function deletePeriod(idx) {
   s.periods.splice(idx, 1);
   if (s.activePeriod >= s.periods.length) s.activePeriod = s.periods.length - 1;
   saveSettings(s);
-  renderAll();
+  safeRender();
 }
 
 function openPeriodModal() {
@@ -485,7 +485,7 @@ function savePeriod() {
   syncAllPanelRanges(s, start, end);
   saveSettings(s);
   closePeriodModal();
-  renderAll();
+  safeRender();
 }
 
 // ── Panel range picker ──
@@ -510,7 +510,7 @@ function applyRange() {
   saveSettings(s);
   document.getElementById('rangeOverlay').classList.remove('active');
   pickingPanel = null;
-  renderAll();
+  safeRender();
 }
 
 function closeRangeModal() {
@@ -632,7 +632,7 @@ function setLineMode(mode) {
   const s = loadSettings();
   s.lineMode = mode;
   saveSettings(s);
-  renderAll();
+  safeRender();
 }
 
 function renderLineChart(data, settings) {
@@ -710,18 +710,21 @@ function renderHistory(data) {
   if (currentPage > totalPages) currentPage = totalPages;
   if (currentPage < 1) currentPage = 1;
 
-  document.getElementById('historyCount').textContent = `（共 ${sorted.length} 条）`;
+  const today = nowISO();
+  const todayShifts = sorted.filter(r => r.date === today);
+  const todayCount = todayShifts.length;
+
+  document.getElementById('historyCount').textContent = `（共 ${sorted.length} 条${todayCount > 0 ? '，今天 ' + todayCount + ' 条' : ''}）`;
   const el = document.getElementById('historyList');
 
   if (sorted.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>暂无记录</p></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>暂无记录</p><p style="font-size:12px;color:var(--text-muted);margin-top:4px">今天还没有班次记录哦</p></div>`;
     document.getElementById('pagination').style.display = 'none';
     return;
   }
 
   const start = (currentPage - 1) * PER_PAGE;
   const pageItems = sorted.slice(start, start + PER_PAGE);
-  const today = nowISO();
 
   el.innerHTML = pageItems.map(r => {
     const bc = r.type === 'day' ? 'day' : 'night';
@@ -729,8 +732,9 @@ function renderHistory(data) {
     let detail = r.type === 'day' ? '¥150' : `${r.hours}h · ¥${r.earnings}`;
     if (r.clockIn && r.clockOut) detail = `🕐${r.clockIn}–${r.clockOut} · ` + detail;
     if (r.note) detail += ` · ${r.note}`;
-    return `<div class="history-item">
-      <span class="history-date">${fmtMD(r.date)}${r.date === today ? ' <span style="color:var(--series-2);font-size:10px">今天</span>' : ''}</span>
+    const isToday = r.date === today;
+    return `<div class="history-item"${isToday ? ' style="background:rgba(57,135,229,0.06)"' : ''}>
+      <span class="history-date">${fmtMD(r.date)}${isToday ? ' <span style="color:var(--series-1);font-size:10px;font-weight:600">今天</span>' : ''}</span>
       <span class="shift-badge ${bc}">${bt}</span>
       <span class="history-detail">${detail}${r.image ? ' 📷' : ''}</span>
       <span class="history-earnings">¥${r.earnings}</span>
@@ -743,6 +747,11 @@ function renderHistory(data) {
     </div>`;
   }).join('');
 
+  // Today indicator: warn if no shifts recorded today
+  if (todayCount === 0 && sorted.length > 0) {
+    el.insertAdjacentHTML('afterbegin', `<div style="text-align:center;padding:12px 20px;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:13px">📅 今天还没有班次记录哦</div>`);
+  }
+
   const pagEl = document.getElementById('pagination');
   if (totalPages > 1) {
     pagEl.style.display = 'flex';
@@ -752,7 +761,8 @@ function renderHistory(data) {
   } else { pagEl.style.display = 'none'; }
 }
 
-function changePage(d) { currentPage += d; renderAll(); }
+function safeRender() { try { renderAll(); } catch(e) { console.error(e); } }
+function changePage(d) { currentPage += d; safeRender(); }
 
 // ── Shift modal ──
 function openShiftModal() {
@@ -760,7 +770,7 @@ function openShiftModal() {
   document.getElementById('shiftSaveBtn').textContent = '保存';
   document.getElementById('modalEditId').value = '';
   document.getElementById('shiftOverlay').classList.add('active');
-  document.getElementById('modalDate').value = nowISO();
+  document.getElementById('modalDate').valueAsDate = new Date();
   document.getElementById('modalClockIn').value = '';
   document.getElementById('modalClockOut').value = '';
   document.getElementById('modalImage').value = '';
@@ -904,7 +914,7 @@ function saveShift() {
   }
   closeShiftModal();
   currentPage = 1;
-  renderAll();
+  safeRender();
 }
 
 function removeShift(id) { if (!confirm('确定删除？')) return; deleteRecord(id); renderAll(); }
@@ -916,7 +926,7 @@ document.getElementById('periodOverlay').addEventListener('click', e => { if (e.
 document.getElementById('rangeOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeRangeModal(); });
 
 // ── Init ──
-try { renderAll(); } catch(e) { console.error('renderAll failed:', e); }
+safeRender();
 </script>
 </body>
 </html>
